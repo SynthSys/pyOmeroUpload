@@ -7,6 +7,7 @@ from omero import client as om_client
 from omero import model
 from omero import rtypes
 from omero import ClientError
+from omero import sys
 import logging
 
 logging.basicConfig()
@@ -64,16 +65,37 @@ class OMERODataBroker:
         conn.setSecure(True)
         return conn
 
-    def create_dataset(self):
+    def create_dataset(self, dataset_name):
         dataset_obj = model.DatasetI()
-        dataset_obj.setName(rtypes.rstring("New Dataset"))
+        dataset_obj.setName(rtypes.rstring(dataset_name))
         dataset_obj = self.SESSION.getUpdateService().saveAndReturnObject(dataset_obj)
         dataset_id = dataset_obj.getId().getValue()
         return dataset_obj
 
     def retrieve_objects(self, data_type, opts):
-        # my_exp_id = self.SESSION.getObjects(data_type, opts=opts)
-        pass
+        objects = list()
+        if data_type == OMERODataType.project:
+            objects = self.SESSION.getContainerService().loadContainerHierarchy("Project", None, None)
+        elif data_type == OMERODataType.dataset:
+            objects = self.SESSION.getContainerService().loadContainerHierarchy("Dataset", None, None)
+        elif data_type == OMERODataType.image:
+            # objects = self.SESSION.getContainerService().getImagesByOptions(opts,  {'omero.group': -1})
+            # objects = self.SESSION.getContainerService().getUserImages(sys.Parameters())
+            objects = self.SESSION.getContainerService().getUserImages(options=opts)
+
+        return objects
+
+    def query_projects(self, params):
+        queryService = self.SESSION.getQueryService()
+        # query = "select p from Project p left outer join fetch p.datasetLinks as links left outer join fetch links.child as dataset where p.id =:pid"
+        query = 'select p from Project p where p.id = :pid'
+
+        project = queryService.findByQuery(query, params)
+        # for dataset in project.linkedDatasetList:
+        #     print dataset.getName().getValue()
+
+        return project
+
 
 def main():
     broker = OMERODataBroker(username="test",
