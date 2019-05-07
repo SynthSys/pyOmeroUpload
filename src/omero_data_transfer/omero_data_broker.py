@@ -7,10 +7,16 @@ from omero import client as om_client
 from omero import model
 from omero import rtypes
 from omero import ClientError
-from omero import sys
 import logging
 
 logging.basicConfig()
+
+SETTINGS = {
+    "omero_server": "localhost",
+    "omero_port": 4064,
+    "username": "test",
+    "password": "test"
+}
 
 
 class OMERODataType(Enum):
@@ -27,9 +33,6 @@ class OMERODataType(Enum):
 
 
 class OMERODataBroker:
-
-    # USERNAME, PASSWORD, HOST, PORT = None, None, None, None
-
     def __init__(self, username="", password="", host="",
                  port=0):
         self.USERNAME = username
@@ -79,8 +82,6 @@ class OMERODataBroker:
         elif data_type == OMERODataType.dataset:
             objects = self.SESSION.getContainerService().loadContainerHierarchy("Dataset", None, None)
         elif data_type == OMERODataType.image:
-            # objects = self.SESSION.getContainerService().getImagesByOptions(opts,  {'omero.group': -1})
-            # objects = self.SESSION.getContainerService().getUserImages(sys.Parameters())
             objects = self.SESSION.getContainerService().getUserImages(options=opts)
 
         return objects
@@ -91,18 +92,16 @@ class OMERODataBroker:
         query = 'select p from Project p where p.id = :pid'
 
         project = queryService.findByQuery(query, params)
-        # for dataset in project.linkedDatasetList:
-        #     print dataset.getName().getValue()
 
         return project
 
 
 def main():
-    broker = OMERODataBroker(username="test",
-                               password="test", host="localhost",
-                               port=4064)
+    broker = OMERODataBroker(username=SETTINGS['username'], password=SETTINGS['password'],
+                             host=SETTINGS['omero_server'], port=SETTINGS['omero_port'])
     broker.get_omero_session()
     broker.close_omero_session()
+
 
 if __name__ == "__main__":
     main()
