@@ -1,0 +1,12 @@
+prod_settings:
+  omero_conn:
+    server: localhost
+    port: 4064
+    username: root
+    password: mysecretpassword
+test_settings:
+  omero_conn:
+    server: localhost
+    port: 4064
+    username: root
+    password: mysecretpassword
