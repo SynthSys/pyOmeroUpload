@@ -84,7 +84,7 @@ setup(
 
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email='pypa-dev@googlegroups.com',  # Optional
+    # author_email='pypa-dev@googlegroups.com',  # Optional
 
     # Classifiers help users find your project by categorizing it.
     #
@@ -119,7 +119,9 @@ setup(
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    package_dir={'': 'src'},  # Optional
+    # package_dir={'omeroupload': 'src'},  # Optional
+    package_dir={'metadata_parser': 'src/pyOmeroUpload/metadata_parser',
+                 'omero_data_transfer': 'src/pyOmeroUpload/omero_data_transfer'},
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -130,7 +132,8 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where='src/pyOmeroUpload/omero_data_transfer') + find_packages(where="src/pyOmeroUpload/metadata_parser"),  # Required
+    # packages=find_packages(where='src/pyOmeroUpload/metadata_parser'),# + find_packages(where="src/pyOmeroUpload/metadata_parser"),  # Required
+    packages=find_packages(where='src/pyOmeroUpload') + find_packages(include=['metadata_parser','omero_data_transfer']),
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -199,9 +202,7 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
-        'Funding': 'https://donate.pypi.org',
-        'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/pypa/sampleproject/',
+        'Bug Reports': 'https://github.com/SynthSys/pyOmeroUpload/issues',
+        'Source': 'https://github.com/SynthSys/pyOmeroUpload',
     },
 )
