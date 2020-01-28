@@ -3,6 +3,7 @@
 
 import os
 from collections import namedtuple
+from metadata_parser import MetadataParser
 
 """
 Metadata in a Swain Lab microscope OMERO record looks like:
@@ -72,131 +73,132 @@ ACQ_METADATA_CONFIG = {
     "end_tag": "Experiment started at:"
 }
 
+class LogMetadataParser(MetadataParser):
 
-def get_str_array_val(metadata_val):
-    str_val = ''
+    def get_str_array_val(self, metadata_val):
+        str_val = ''
 
-    if isinstance(metadata_val, list):
-        str_val = metadata_val[0]
-    elif isinstance(metadata_val, str):
-        str_val = metadata_val
+        if isinstance(metadata_val, list):
+            str_val = metadata_val[0]
+        elif isinstance(metadata_val, str):
+            str_val = metadata_val
 
-    return str_val
-
-
-def create_log_metadata_obj(metadata):
-    log_metadata = namedtuple('LogMetadata', [], verbose=False)
-
-    log_metadata.aim = get_str_array_val(metadata['aim'])
-    log_metadata.project = get_str_array_val(metadata['omero project'])
-    log_metadata.exp_start_date = get_str_array_val(metadata['experiment started at'])
-
-    if len(metadata['strain']) > 0:
-        log_metadata.strain = metadata['strain'][0]
-
-    log_metadata.comments = metadata['comments']
-
-    if len(metadata['brightfield']) > 0:
-        log_metadata.brightfield = metadata['brightfield']
-
-    log_metadata.dic = metadata['dic']
-    log_metadata.gfp = metadata['gfp']
-    log_metadata.cy5 = metadata['cy5']
-    log_metadata.gfpfast = metadata['gfpfast']
-    log_metadata.tags = metadata['omero tags']
-
-    return log_metadata
+        return str_val
 
 
-"""
-This function reads a Swain Lab microscope log file and extracts the metadata
-from the experimental metadata block at the beginning. The metadata are 
-collected in a dictionary, with each key-value-pair comprising the metadata tag
-key and a list of attribute values. Essentially, each new line character within a
-metadata attribute tag inserts a new item in the list of values, so there might
-need to be some rules engine that specifies how to parse the actual metadata
-attribute values depending on the tag? For example, perhaps 'omero tags' 
-should be split into multiple items as a comma-separated list, while 'comments'
-should be split based on new line chars. 
-"""
-def extract_log_metadata(filename):
-    # init the metadata attributes dict
-    metadata = dict()
+    def create_log_metadata_obj(self, metadata):
+        log_metadata = namedtuple('LogMetadata', [], verbose=False)
 
-    # add each attribute tag as a key in the dict
-    for attr_tag in LOG_METADATA_CONFIG["attribute_tags"]:
-        metadata[attr_tag.rstrip(":").lower()] = list()
+        log_metadata.aim = get_str_array_val(metadata['aim'])
+        log_metadata.project = get_str_array_val(metadata['omero project'])
+        log_metadata.exp_start_date = get_str_array_val(metadata['experiment started at'])
 
-    metadata_attr_tags = LOG_METADATA_CONFIG["attribute_tags"]
-    f = open(filename)  # This is a big file
+        if len(metadata['strain']) > 0:
+            log_metadata.strain = metadata['strain'][0]
 
-    is_metadata_block = False
-    cur_metadata_attr = None
+        log_metadata.comments = metadata['comments']
 
-    # read each line in the file
-    for line in f:
+        if len(metadata['brightfield']) > 0:
+            log_metadata.brightfield = metadata['brightfield']
 
-        # exit reading the file if we have reached the end of metadata block
-        if line.startswith(LOG_METADATA_CONFIG["end_tag"]):
-            is_metadata_block = False
-            break
+        log_metadata.dic = metadata['dic']
+        log_metadata.gfp = metadata['gfp']
+        log_metadata.cy5 = metadata['cy5']
+        log_metadata.gfpfast = metadata['gfpfast']
+        log_metadata.tags = metadata['omero tags']
 
-        if line.startswith('PFS is locked'):
-            continue
+        return log_metadata
 
-        if is_metadata_block:
-            # if we're in the metadata block, check for a current attribute tag
-            if cur_metadata_attr is None:
-                # First check if the line is a new metadata attribute tag
-                if line.strip() in metadata_attr_tags:
-                    cur_metadata_attr = line.strip().rstrip(":").lower()
+
+    """
+    This function reads a Swain Lab microscope log file and extracts the metadata
+    from the experimental metadata block at the beginning. The metadata are 
+    collected in a dictionary, with each key-value-pair comprising the metadata tag
+    key and a list of attribute values. Essentially, each new line character within a
+    metadata attribute tag inserts a new item in the list of values, so there might
+    need to be some rules engine that specifies how to parse the actual metadata
+    attribute values depending on the tag? For example, perhaps 'omero tags' 
+    should be split into multiple items as a comma-separated list, while 'comments'
+    should be split based on new line chars. 
+    """
+    def extract_metadata(self, filename):
+        # init the metadata attributes dict
+        metadata = dict()
+
+        # add each attribute tag as a key in the dict
+        for attr_tag in LOG_METADATA_CONFIG["attribute_tags"]:
+            metadata[attr_tag.rstrip(":").lower()] = list()
+
+        metadata_attr_tags = LOG_METADATA_CONFIG["attribute_tags"]
+        f = open(filename)  # This is a big file
+
+        is_metadata_block = False
+        cur_metadata_attr = None
+
+        # read each line in the file
+        for line in f:
+
+            # exit reading the file if we have reached the end of metadata block
+            if line.startswith(LOG_METADATA_CONFIG["end_tag"]):
+                is_metadata_block = False
+                break
+
+            if line.startswith('PFS is locked'):
+                continue
+
+            if is_metadata_block:
+                # if we're in the metadata block, check for a current attribute tag
+                if cur_metadata_attr is None:
+                    # First check if the line is a new metadata attribute tag
+                    if line.strip() in metadata_attr_tags:
+                        cur_metadata_attr = line.strip().rstrip(":").lower()
+                    else:
+                        # next check if the line starts with a metadata attribute tag
+                        for attr in metadata_attr_tags:
+                            if line.startswith(attr) or attr in line:
+                                cur_metadata_attr = attr.strip().rstrip(":").lower()
+
+                                if not line.strip().endswith(attr):
+                                    # if line doesn't end with the attribute tag, there are values
+                                    # on the line and we assume it's a one line tag
+                                    metadata[cur_metadata_attr].append(line.strip().split(attr)[1].strip())
+                                    cur_metadata_attr = None
+
+                                continue
+                            else:
+                                if cur_metadata_attr is not None:
+                                    # this line must be a continuation of the metadata tag
+                                    metadata[cur_metadata_attr].append(line.strip())
                 else:
-                    # next check if the line starts with a metadata attribute tag
-                    for attr in metadata_attr_tags:
-                        if line.startswith(attr) or attr in line:
-                            cur_metadata_attr = attr.strip().rstrip(":").lower()
+                    # First check if the line is a new metadata attribute tag
+                    if line.strip() in metadata_attr_tags:
+                        cur_metadata_attr = line.strip().rstrip(":").lower()
+                    else:
+                        # next check if the line starts with a metadata attribute tag
+                        for attr in metadata_attr_tags:
+                            if line.startswith(attr) or attr in line:
+                                cur_metadata_attr = attr.strip().rstrip(":").lower()
 
-                            if not line.strip().endswith(attr):
-                                # if line doesn't end with the attribute tag, there are values
-                                # on the line and we assume it's a one line tag
-                                metadata[cur_metadata_attr].append(line.strip().split(attr)[1].strip())
-                                cur_metadata_attr = None
+                                if not line.strip().endswith(attr):
+                                    # if line doesn't end with the attribute tag, there are values
+                                    # on the line and we assume it's a one line tag
+                                    metadata[cur_metadata_attr].append(line.strip().split(attr)[1].strip())
+                                    cur_metadata_attr = None
 
-                            continue
-                        else:
-                            if cur_metadata_attr is not None:
-                                # this line must be a continuation of the metadata tag
-                                metadata[cur_metadata_attr].append(line.strip())
-            else:
-                # First check if the line is a new metadata attribute tag
-                if line.strip() in metadata_attr_tags:
-                    cur_metadata_attr = line.strip().rstrip(":").lower()
-                else:
-                    # next check if the line starts with a metadata attribute tag
-                    for attr in metadata_attr_tags:
-                        if line.startswith(attr) or attr in line:
-                            cur_metadata_attr = attr.strip().rstrip(":").lower()
+                                break
+                        if not line.startswith(attr) and attr not in line:
+                            # this line must be a continuation of the metadata tag
+                            metadata[cur_metadata_attr].append(line.strip())
 
-                            if not line.strip().endswith(attr):
-                                # if line doesn't end with the attribute tag, there are values
-                                # on the line and we assume it's a one line tag
-                                metadata[cur_metadata_attr].append(line.strip().split(attr)[1].strip())
-                                cur_metadata_attr = None
+            if LOG_METADATA_CONFIG["start_tag"] == line.strip():
+                is_metadata_block = True
 
-                            break
-                    if not line.startswith(attr) and attr not in line:
-                        # this line must be a continuation of the metadata tag
-                        metadata[cur_metadata_attr].append(line.strip())
+        f.close()
 
-        if LOG_METADATA_CONFIG["start_tag"] == line.strip():
-            is_metadata_block = True
+        print metadata
+        log_metadata = create_log_metadata_obj(metadata)
 
-    f.close()
-
-    print metadata
-    log_metadata = create_log_metadata_obj(metadata)
-
-    return log_metadata
+        return log_metadata
 
 
 def main():
@@ -217,7 +219,9 @@ def main():
     #filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
     #                         "dataset_14507", "Batgirl_Morph_OldCamera_Myo1_Lte1_Bud3_Htb2_Hog1log.txt")
 
-    metadata = extract_log_metadata(filename)
+    # metadata = extract_log_metadata(filename)
+    metadata_parser = LogMetadataParser()
+    metadata = metadata_parser.extract_metadata(filename)
     '''log_metadata = namedtuple('LogMetadata', [], verbose=False)
     log_metadata.aim = metadata['aim'][0]
 
