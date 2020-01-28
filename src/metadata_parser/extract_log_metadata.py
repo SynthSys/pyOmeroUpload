@@ -89,9 +89,9 @@ class LogMetadataParser(MetadataParser):
     def create_log_metadata_obj(self, metadata):
         log_metadata = namedtuple('LogMetadata', [], verbose=False)
 
-        log_metadata.aim = get_str_array_val(metadata['aim'])
-        log_metadata.project = get_str_array_val(metadata['omero project'])
-        log_metadata.exp_start_date = get_str_array_val(metadata['experiment started at'])
+        log_metadata.aim = self.get_str_array_val(metadata['aim'])
+        log_metadata.project = self.get_str_array_val(metadata['omero project'])
+        log_metadata.exp_start_date = self.get_str_array_val(metadata['experiment started at'])
 
         if len(metadata['strain']) > 0:
             log_metadata.strain = metadata['strain'][0]
@@ -196,17 +196,20 @@ class LogMetadataParser(MetadataParser):
         f.close()
 
         print metadata
-        log_metadata = create_log_metadata_obj(metadata)
+        log_metadata = self.create_log_metadata_obj(metadata)
 
         return log_metadata
 
 
 def main():
     print PROJECT_DIR
+    '''
     filename = os.path.join(PROJECT_DIR, "tests", "test_data", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt")
 
     filename = os.path.join(PROJECT_DIR,  "tests", "test_data", "sample_logfiles",
                               "dataset_12655", "20171205_vph1hxt1log.txt")
+    '''
+    filename =  os.path.join(PROJECT_DIR, '..', 'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00', 'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt')
 
     # filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles", "dataset_846", "lowglc_screen_hog1_gln3_mig1_msn2_yap1log.txt")
 
