@@ -174,25 +174,25 @@ class AcqMetadataParser(MetadataParser):
             # print parsed_line
         # --------------------- channels --------------------  #
         elif section_name is 'channels':
-            return_val = build_table(line, channel_header_rx, channel_row_rx,
+            return_val = self.build_table(line, channel_header_rx, channel_row_rx,
                                     section_name, channel_table)
 
             return return_val
         # --------------------- points --------------------  #
         elif section_name is 'positions':
-            return_val = build_table(line, points_header_rx, points_row_rx,
+            return_val = self.build_table(line, points_header_rx, points_row_rx,
                                     section_name, points_table)
 
             return return_val
         # --------------------- zsect --------------------  #
         elif section_name is 'zsect':
-            return_val = build_table(line, zsect_header_rx, zsect_vals_rx,
+            return_val = self.build_table(line, zsect_header_rx, zsect_vals_rx,
                                     section_name, zsect_table)
 
             return return_val
         # --------------------- pumpstart --------------------  #
         elif section_name is 'pumpstart':
-            return_val = build_table(line, pst_header_rx, pst_row_rx,
+            return_val = self.build_table(line, pst_header_rx, pst_row_rx,
                                     section_name, pump_start_table)
 
             return return_val
@@ -229,7 +229,7 @@ class AcqMetadataParser(MetadataParser):
         # --------------------- switchvol --------------------  #
         # --------------------- switchrate --------------------  #
         elif section_name in switch_params_in:
-            return_val = update_params(line, raw_switch_from_rx, section_name)
+            return_val = self.update_params(line, raw_switch_from_rx, section_name)
 
             return return_val
 
@@ -291,12 +291,12 @@ class AcqMetadataParser(MetadataParser):
                         if line == 'Switching parameters:':
                             line = 'Switching parameters:2,6'
                             line = 'Switching parameters:'
-                        active_section = handle_section(line, current_section)
+                        active_section = self.handle_section(line, current_section)
 
             elif active_section is not None:
-                active_section = handle_section(line, current_section)
+                active_section = self.handle_section(line, current_section)
 
-        acq_annot = create_acq_metadata_obj()
+        acq_annot = self.create_acq_metadata_obj()
 
         file.close()
 
@@ -306,7 +306,7 @@ class AcqMetadataParser(MetadataParser):
 def main():
     global switch_params
     print PROJECT_DIR
-    input_path = os.path.join(PROJECT_DIR, "tests", "test_data",
+    input_path = os.path.join(PROJECT_DIR, '..', 
                               "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00",
                               "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1Acq.txt")
 
@@ -327,15 +327,15 @@ def main():
 
     # input_file = open(input_path)
     #acq_annot = parse_acq_file(input_file)
-    
+
     metadata_parser = AcqMetadataParser()
     metadata = metadata_parser.extract_metadata(input_path)
 
-    print acq_annot.channels
-    print acq_annot.times
-    print acq_annot.switch_params
-    print acq_annot.zsections
-    print acq_annot.positions
+    print metadata.channels
+    print metadata.times
+    print metadata.switch_params
+    print metadata.zsections
+    print metadata.positions
 
 if __name__ == "__main__":
     main()
