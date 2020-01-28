@@ -1,6 +1,7 @@
 import os
 import re
 from collections import OrderedDict, namedtuple
+from metadata_parser import MetadataParser
 
 import pandas as pd
 
@@ -91,213 +92,215 @@ PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", ".
 # Load the input file to a variable
 print PROJECT_DIR
 
-
-'''
-Populate switch_params structure with specified parameter
-'''
-def update_params(line, raw_rx, param_name):
-    rx = re.compile(raw_rx)
-    search_res = re.split(rx, line)
-
-    # retrieve the corresponding param name in output form
-    idx = switch_params_in.keys().index(param_name)
-    param_name_out = list(switch_params)[idx]
-
-    if search_res is not None:
-        if len(search_res) > 1:
-            param_val = search_res[1]
-            if param_val:
-                switch_params[param_name_out].append(float(param_val))
-                return
-        else:
-            rx = re.compile(raw_num_val_rx)
-            search_res = re.search(rx, line)
-
-            if search_res is not None:
-                param_val_args = search_res.groups()
-
-                if param_val_args is not None:
-                    switch_params[param_name_out].append(float(param_val_args[0]))
-
-                    # handle cases where param values are listed over successive lines
-                    if param_name in multi_line_params:
-                        global multi_line_count
-                        multi_line_count = multi_line_count+1
-                        max_lines = multi_line_params[param_name]
-                        if multi_line_count == max_lines:
-                            multi_line_count = 0
-                            return
-                        else:
-                            return param_name
-                    else:
-                        return
-
-        return param_name
-
-
-'''
-Populate the specified data frame row by row
-'''
-def build_table(line, raw_header_rx, raw_row_rx, table_name, df):
-    row_rx = re.compile(raw_row_rx)
-    search_res = re.findall(row_rx, line)
-
-    # if search_res is not None:
-    if len(search_res) > 0:
-        search_res = re.split(row_rx, line)
-        print line
-        df.loc[len(df)] = list(filter(None, search_res))
-    else:
-        header_rx = re.compile(raw_header_rx)
-        search_res = re.findall(header_rx, line)
-
-        # if search_res is not None:
-        if len(search_res) > 0:
-            # it's the header row; nothing to do since dataframe is already init'ed
-            search_res = re.split(header_rx, line)
-
-    print df
-
-    return table_name
-
-
-def handle_section(line, section_name):
-    global switch_params
-
-    # --------------------- npumps --------------------  #
-    if section_name is 'npumps':
-        global npumps
-        rx = re.compile(raw_npumps_rx)
-        npumps = float(re.search(rx, line).group(1))
-
-        # print parsed_line
-    # --------------------- channels --------------------  #
-    elif section_name is 'channels':
-        return_val = build_table(line, channel_header_rx, channel_row_rx,
-                                 section_name, channel_table)
-
-        return return_val
-    # --------------------- points --------------------  #
-    elif section_name is 'positions':
-        return_val = build_table(line, points_header_rx, points_row_rx,
-                                 section_name, points_table)
-
-        return return_val
-    # --------------------- zsect --------------------  #
-    elif section_name is 'zsect':
-        return_val = build_table(line, zsect_header_rx, zsect_vals_rx,
-                                 section_name, zsect_table)
-
-        return return_val
-    # --------------------- pumpstart --------------------  #
-    elif section_name is 'pumpstart':
-        return_val = build_table(line, pst_header_rx, pst_row_rx,
-                                 section_name, pump_start_table)
-
-        return return_val
-    # --------------------- switchparams --------------------  #
-    elif section_name is 'switchparams':
-        rx = re.compile(raw_switch_params_rx)
+class AcqMetadataParser(MetadataParser):
+    '''
+    Populate switch_params structure with specified parameter
+    '''
+    def update_params(self, line, raw_rx, param_name):
+        rx = re.compile(raw_rx)
         search_res = re.split(rx, line)
+
+        # retrieve the corresponding param name in output form
+        idx = switch_params_in.keys().index(param_name)
+        param_name_out = list(switch_params)[idx]
 
         if search_res is not None:
             if len(search_res) > 1:
-                switch_params['volume'] = search_res[1]
-                switch_params['rate'] = search_res[2]
-                return
+                param_val = search_res[1]
+                if param_val:
+                    switch_params[param_name_out].append(float(param_val))
+                    return
+            else:
+                rx = re.compile(raw_num_val_rx)
+                search_res = re.search(rx, line)
+
+                if search_res is not None:
+                    param_val_args = search_res.groups()
+
+                    if param_val_args is not None:
+                        switch_params[param_name_out].append(float(param_val_args[0]))
+
+                        # handle cases where param values are listed over successive lines
+                        if param_name in multi_line_params:
+                            global multi_line_count
+                            multi_line_count = multi_line_count+1
+                            max_lines = multi_line_params[param_name]
+                            if multi_line_count == max_lines:
+                                multi_line_count = 0
+                                return
+                            else:
+                                return param_name
+                        else:
+                            return
+
+            return param_name
+
+
+    '''
+    Populate the specified data frame row by row
+    '''
+    def build_table(self, line, raw_header_rx, raw_row_rx, table_name, df):
+        row_rx = re.compile(raw_row_rx)
+        search_res = re.findall(row_rx, line)
+
+        # if search_res is not None:
+        if len(search_res) > 0:
+            search_res = re.split(row_rx, line)
+            print line
+            df.loc[len(df)] = list(filter(None, search_res))
         else:
-            return_val = section_name
+            header_rx = re.compile(raw_header_rx)
+            search_res = re.findall(header_rx, line)
+
+            # if search_res is not None:
+            if len(search_res) > 0:
+                # it's the header row; nothing to do since dataframe is already init'ed
+                search_res = re.split(header_rx, line)
+
+        print df
+
+        return table_name
+
+
+    def handle_section(self, line, section_name):
+        global switch_params
+
+        # --------------------- npumps --------------------  #
+        if section_name is 'npumps':
+            global npumps
+            rx = re.compile(raw_npumps_rx)
+            npumps = float(re.search(rx, line).group(1))
+
+            # print parsed_line
+        # --------------------- channels --------------------  #
+        elif section_name is 'channels':
+            return_val = build_table(line, channel_header_rx, channel_row_rx,
+                                    section_name, channel_table)
 
             return return_val
-    # --------------------- times --------------------  #
-    elif section_name is 'times':
-        global time_dict
-        rx = re.compile(raw_times_rx)
-        search_res = re.findall(rx, line)
+        # --------------------- points --------------------  #
+        elif section_name is 'positions':
+            return_val = build_table(line, points_header_rx, points_row_rx,
+                                    section_name, points_table)
 
-        if len(search_res) > 0:
-            search_res = list(filter(None, re.split(rx, line)))
+            return return_val
+        # --------------------- zsect --------------------  #
+        elif section_name is 'zsect':
+            return_val = build_table(line, zsect_header_rx, zsect_vals_rx,
+                                    section_name, zsect_table)
 
-            time_dict = dict(zip(time_dict_keys, search_res))
-            return
+            return return_val
+        # --------------------- pumpstart --------------------  #
+        elif section_name is 'pumpstart':
+            return_val = build_table(line, pst_header_rx, pst_row_rx,
+                                    section_name, pump_start_table)
 
-        return section_name
-    # --------------------- switchto --------------------  #
-    # --------------------- switchfrom --------------------  #
-    # --------------------- switchvol --------------------  #
-    # --------------------- switchvol --------------------  #
-    # --------------------- switchrate --------------------  #
-    elif section_name in switch_params_in:
-        return_val = update_params(line, raw_switch_from_rx, section_name)
+            return return_val
+        # --------------------- switchparams --------------------  #
+        elif section_name is 'switchparams':
+            rx = re.compile(raw_switch_params_rx)
+            search_res = re.split(rx, line)
 
-        return return_val
+            if search_res is not None:
+                if len(search_res) > 1:
+                    switch_params['volume'] = search_res[1]
+                    switch_params['rate'] = search_res[2]
+                    return
+            else:
+                return_val = section_name
 
+                return return_val
+        # --------------------- times --------------------  #
+        elif section_name is 'times':
+            global time_dict
+            rx = re.compile(raw_times_rx)
+            search_res = re.findall(rx, line)
 
-def create_acq_metadata_obj():
-    acq_annot = namedtuple('AcqAnnotation', [], verbose=False)
-    acq_annot.channels = channel_table
-    acq_annot.zsections = zsect_table
-    acq_annot.times = time_dict
-    acq_annot.positions = points_table
-    acq_annot.npumps = npumps
-    acq_annot.pump_init = pump_start_table
-    acq_annot.switch_params = dict(switch_params)
+            if len(search_res) > 0:
+                search_res = list(filter(None, re.split(rx, line)))
 
-    return acq_annot
+                time_dict = dict(zip(time_dict_keys, search_res))
+                return
 
+            return section_name
+        # --------------------- switchto --------------------  #
+        # --------------------- switchfrom --------------------  #
+        # --------------------- switchvol --------------------  #
+        # --------------------- switchvol --------------------  #
+        # --------------------- switchrate --------------------  #
+        elif section_name in switch_params_in:
+            return_val = update_params(line, raw_switch_from_rx, section_name)
 
-def parse_acq_file(file):
-    global section_line_num
-    print 'hello'
-
-    section_rxs = map(re.compile, raw_section_rxs)
-
-    active_section = None
-
-    # read each line in the file
-    for line in file:
-        line = line.strip()
-
-        if not line:
-            continue
-
-        section_line_num += 1
-
-        # match = next((x for x in raw_section_rx if x in line), False)
-        # print line
-        # print match
-
-        if any(regex.search(line) for regex in section_rxs):
-            # find a way to get the matched regex...
-            # https://stackoverflow.com/questions/3389574/check-if-multiple-strings-exist-in-another-string
-            # https://docs.python.org/2/library/re.html#search-vs-match
-
-            # https://github.com/lark-parser/lark
-            # https://tomassetti.me/parsing-in-python/
-            # https://github.com/google/textfsm
-
-            for section_rx in section_rxs:
-                # print('Looking for "%s" in "%s" ->' % (section_rx, line))
-                if re.search(section_rx, line):
-
-                    section_rx_idx = section_rxs.index(section_rx)
-
-                    current_section = section_names[section_rx_idx]
+            return return_val
 
 
-                    if line == 'Switching parameters:':
-                        line = 'Switching parameters:2,6'
-                        line = 'Switching parameters:'
-                    active_section = handle_section(line, current_section)
+    def create_acq_metadata_obj(self):
+        acq_annot = namedtuple('AcqAnnotation', [], verbose=False)
+        acq_annot.channels = channel_table
+        acq_annot.zsections = zsect_table
+        acq_annot.times = time_dict
+        acq_annot.positions = points_table
+        acq_annot.npumps = npumps
+        acq_annot.pump_init = pump_start_table
+        acq_annot.switch_params = dict(switch_params)
 
-        elif active_section is not None:
-            active_section = handle_section(line, current_section)
+        return acq_annot
 
-    acq_annot = create_acq_metadata_obj()
 
-    file.close()
+    def extract_metadata(self, filename):
+        global section_line_num
+        print 'hello'
 
-    return acq_annot
+        section_rxs = map(re.compile, raw_section_rxs)
+
+        active_section = None
+
+        file = open(filename)  # This is a big file
+
+        # read each line in the file
+        for line in file:
+            line = line.strip()
+
+            if not line:
+                continue
+
+            section_line_num += 1
+
+            # match = next((x for x in raw_section_rx if x in line), False)
+            # print line
+            # print match
+
+            if any(regex.search(line) for regex in section_rxs):
+                # find a way to get the matched regex...
+                # https://stackoverflow.com/questions/3389574/check-if-multiple-strings-exist-in-another-string
+                # https://docs.python.org/2/library/re.html#search-vs-match
+
+                # https://github.com/lark-parser/lark
+                # https://tomassetti.me/parsing-in-python/
+                # https://github.com/google/textfsm
+
+                for section_rx in section_rxs:
+                    # print('Looking for "%s" in "%s" ->' % (section_rx, line))
+                    if re.search(section_rx, line):
+
+                        section_rx_idx = section_rxs.index(section_rx)
+
+                        current_section = section_names[section_rx_idx]
+
+
+                        if line == 'Switching parameters:':
+                            line = 'Switching parameters:2,6'
+                            line = 'Switching parameters:'
+                        active_section = handle_section(line, current_section)
+
+            elif active_section is not None:
+                active_section = handle_section(line, current_section)
+
+        acq_annot = create_acq_metadata_obj()
+
+        file.close()
+
+        return acq_annot
 
 
 def main():
@@ -322,8 +325,11 @@ def main():
     #input_path = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
      #                      "dataset_14507", "Batgirl_Morph_OldCamera_Myo1_Lte1_Bud3_Htb2_Hog1Acq.txt")
 
-    input_file = open(input_path)
-    acq_annot = parse_acq_file(input_file)
+    # input_file = open(input_path)
+    #acq_annot = parse_acq_file(input_file)
+    
+    metadata_parser = AcqMetadataParser()
+    metadata = metadata_parser.extract_metadata(input_path)
 
     print acq_annot.channels
     print acq_annot.times
