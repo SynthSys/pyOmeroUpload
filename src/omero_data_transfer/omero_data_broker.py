@@ -14,19 +14,11 @@ from omero import constants
 import omero.util.script_utils as script_utils
 from PIL import Image
 import numpy as np
-import logging
 from threading import Thread, BoundedSemaphore
 from multiprocessing.pool import ThreadPool
 from functools import partial
 from image_processor import ImageProcessor
 from default_image_processor import DefaultImageProcessor
-
-SU_LOG = logging.getLogger("omero.util.script_utils")
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
-logging.debug('This message should go to the log file')
-logging.info('So should this')
-logging.warning('And this, too')
-
 
 class OMERODataType(Enum):
     project = 1
@@ -248,7 +240,7 @@ class OMERODataBroker:
             params.map = {"did": rtypes.rlong(dataset_id)}
             dataset = query_service.findByQuery(query, params)
 
-            print dataset
+            print dataset.getId().getValue()
 
         pool = ThreadPool(processes=10)
 
