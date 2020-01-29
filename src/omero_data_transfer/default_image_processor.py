@@ -2,30 +2,41 @@ from image_processor import ImageProcessor
 import glob
 import abc
 import os
+from omero import sys
+from omero import rtypes
+from omero import model
+import numpy as np
+import omero.util.script_utils as script_utils
+import logging
+
+logging.basicConfig(filename='example.log',level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
+
+SU_LOG = logging.getLogger("omero.util.script_utils")
 
 class DefaultImageProcessor(ImageProcessor):
 
     def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
-        update_service = omero_session.getUpdateService()
-        pixels_service = omero_session.getPixelsService()
-
         common_path = os.path.commonprefix(file_path)
         print common_path
 
-        cube_dirs = glob.glob(''.join([common_path,'*']))
+        cube_dirs = glob.glob(''.join([common_path,'pos???']))
 
         query_service = omero_session.getQueryService()
         update_service = omero_session.getUpdateService()
         pixels_service = omero_session.getPixelsService()
 
         for path in cube_dirs:
-            self.upload_dir_as_images(query_service, update_service, pixels_service,
-                                    path, dataset, convert_to_uint16)
+            if os.path.isdir(path) == True:
+                self.upload_dir_as_images(omero_session, query_service, update_service, pixels_service,
+                                        path, dataset, convert_to_uint16)
 
 
-        # adapted from script_utils
-    def upload_dir_as_images(self, omero_session, queryService, updateService,
-                          pixelsService, path, dataset=None, convert_to_uint16=False):
+    # adapted from script_utils
+    def upload_dir_as_images(self, omero_session, query_service, update_service,
+                          pixels_service, path, dataset=None, convert_to_uint16=False):
         """
         Reads all the images in the directory specified by 'path' and
         uploads them to OMERO as a single
@@ -134,11 +145,11 @@ class DefaultImageProcessor(ImageProcessor):
         pType = plane.dtype.name
         # look up the PixelsType object from DB
         # omero::model::PixelsType
-        pixelsType = queryService.findByQuery(
+        pixelsType = query_service.findByQuery(
             "from PixelsType as p where p.value='%s'" % pType, None)
         if pixelsType is None and pType.startswith("float"):  # e.g. float32
             # omero::model::PixelsType
-            pixelsType = queryService.findByQuery(
+            pixelsType = query_service.findByQuery(
                 "from PixelsType as p where p.value='%s'" % script_utils.PixelsTypefloat, None)
         if pixelsType is None:
             SU_LOG.warn("Unknown pixels type for: %s" % pType)
@@ -150,17 +161,17 @@ class DefaultImageProcessor(ImageProcessor):
 
         if convert_to_uint16 == True:
             query = "from PixelsType as p where p.value='uint16'"
-            pixelsType = queryService.findByQuery(query, None)
+            pixelsType = query_service.findByQuery(query, None)
 
         # code below here is very similar to combineImages.py
         # create an image in OMERO and populate the planes with numpy 2D arrays
         channelList = range(sizeC)
-        imageId = pixelsService.createImage(
+        imageId = pixels_service.createImage(
             sizeX, sizeY, sizeZ, sizeT, channelList,
             pixelsType, imageName, description)
         params = sys.ParametersI()
         params.addId(imageId)
-        pixelsId = queryService.projection(
+        pixelsId = query_service.projection(
             "select p.id from Image i join i.pixels p where i.id = :id",
             params)[0][0].val
 
@@ -202,7 +213,7 @@ class DefaultImageProcessor(ImageProcessor):
                         script_utils.upload_plane(rawPixelStore, plane2D, theZ, theC, theT)
                         minValue = min(minValue, plane2D.min())
                         maxValue = max(maxValue, plane2D.max())
-                pixelsService.setChannelGlobalMinMax(
+                pixels_service.setChannelGlobalMinMax(
                     pixelsId, theC, float(minValue), float(maxValue))
                 rgba = None
                 if theC in colourMap:
@@ -217,21 +228,22 @@ class DefaultImageProcessor(ImageProcessor):
             rawPixelStore.close()
 
         # add channel names
-        pixels = pixelsService.retrievePixDescription(pixelsId)
+        pixels = pixels_service.retrievePixDescription(pixelsId)
         i = 0
         # c is an instance of omero.model.ChannelI
         for c in pixels.iterateChannels():
             # returns omero.model.LogicalChannelI
             lc = c.getLogicalChannel()
             lc.setName(rtypes.rstring(channels[i]))
-            updateService.saveObject(lc)
+            update_service.saveObject(lc)
             i += 1
 
+        print "here"
         # put the image in dataset, if specified.
         if dataset:
             link = model.DatasetImageLinkI()
             link.parent = model.DatasetI(dataset.id.val, False)
             link.child = model.ImageI(imageId, False)
-            updateService.saveAndReturnObject(link)
+            update_service.saveAndReturnObject(link)
 
         return imageId
