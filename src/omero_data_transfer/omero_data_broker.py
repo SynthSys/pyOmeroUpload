@@ -158,9 +158,9 @@ class OMERODataBroker:
 
         repository_id = resources.repositories().descriptions[0].getId().getValue()
         print repository_id
-        for des in resources.repositories().descriptions:
-            print des
-            print des._id
+        #for des in resources.repositories().descriptions:
+            #print des
+            #print des._id
 
         # create columns and data types, and populate with data
         data_types = dataframe.dtypes
@@ -182,7 +182,7 @@ class OMERODataBroker:
                 data_col = grid.StringColumn(col, '', max_len, list(dataframe.iloc[:, index].values))
                 table_data.append(data_col)
 
-        print table_data
+        # print table_data
 
         table = resources.newTable(repository_id, ''.join(["/", table_name, ".h5"]))
         # table = resources.newTable(dataset_id, table_name)
@@ -196,9 +196,11 @@ class OMERODataBroker:
         data2 = grid.StringColumn('MyStringColumn', '', 64, strings)
         data = [data1, data2]
         table.addData(data)'''
+
+        # note that this worked after the table.close() statement was invoked in 5.4.10
+        orig_file = table.getOriginalFile()
         table.close()  # when we are done, close.
 
-        orig_file = table.getOriginalFile()
         orig_file_id = orig_file.id.val
         print orig_file_id
         # ...so you can attach this data to an object e.g. Dataset

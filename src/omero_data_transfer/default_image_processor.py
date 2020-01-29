@@ -1,5 +1,6 @@
 from image_processor import ImageProcessor
 import glob
+import abc
 
 class DefaultImageProcessor(ImageProcessor):
 

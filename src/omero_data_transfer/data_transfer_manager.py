@@ -3,17 +3,17 @@
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 print sys.path
 
 import os
 import glob
 from omero_data_transfer.omero_data_broker import OMERODataBroker
-from metadata_parser.extract_log_metadata import LogMetadataParser
-from metadata_parser.extract_acq_metadata import AcqMetadataParser
 import subprocess
 import yaml
-from default_image_processor import DefaultImageProcessor
+from omero_data_transfer.default_image_processor import DefaultImageProcessor
+from metadata_parser.extract_log_metadata import LogMetadataParser
+from metadata_parser.extract_acq_metadata import AcqMetadataParser
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -117,9 +117,9 @@ def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
     print input_path
 
     # handle acquisition metadata file parsing
-    input_file = open(input_path[0])
+    # input_file = open(input_path[0])
     acq_parser = AcqMetadataParser()
-    acq_metadata = acq_parser.extract_metadata(input_file)
+    acq_metadata = acq_parser.extract_metadata(input_path[0])
 
     input_path = glob.glob(os.path.join(dir_path,'*log.txt'))
     print input_path
@@ -189,6 +189,7 @@ def upload_data_dir(data_broker, dir_path, import_images=True):
     # create the dataset using metadata values
     print dir(log_metadata)
     dataset_name = log_metadata.aim
+    print dataset_name
 
     try:
         data_broker.open_omero_session()
@@ -210,6 +211,7 @@ def upload_data_dir(data_broker, dir_path, import_images=True):
                     files_to_upload.append(os.path.join(root, sub_dir, data_file))
 
         dataset_id = str(dataset_obj.getId().getValue())
+        print dataset_id
         upload_metadata(dataset_id, data_broker, dir_path, log_metadata)
 
         # if the image data files are to be imported as is in their existing format,

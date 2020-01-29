@@ -2,6 +2,7 @@ import os
 import re
 from collections import OrderedDict, namedtuple
 from metadata_parser import MetadataParser
+import abc
 
 import pandas as pd
 

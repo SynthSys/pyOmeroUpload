@@ -4,6 +4,7 @@
 import os
 from collections import namedtuple
 from metadata_parser import MetadataParser
+import abc
 
 """
 Metadata in a Swain Lab microscope OMERO record looks like:
