@@ -3,7 +3,7 @@ import glob
 
 class DefaultImageProcessor(ImageProcessor):
 
-    def processImages(self, omero_session, file_path, dataset=None, convert_to_uint16=False):
+    def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
         update_service = self.SESSION.getUpdateService()
         pixels_service = self.SESSION.getPixelsService()
 
@@ -18,7 +18,7 @@ class DefaultImageProcessor(ImageProcessor):
 
         for path in cube_dirs:
             self.upload_dir_as_images(query_service, update_service, pixels_service,
-                                    path, dataset, convert_to_uint16=True)
+                                    path, dataset, convert_to_uint16)
 
 
         # adapted from script_utils

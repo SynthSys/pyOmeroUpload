@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# override installed pyOmeroUpload package
+import sys
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+print sys.path
+
 import os
 import glob
 from omero_data_transfer.omero_data_broker import OMERODataBroker
-import metadata_parser.extract_log_metadata as log_parser
-import metadata_parser.extract_acq_metadata as acq_parser
+from metadata_parser.extract_log_metadata import LogMetadataParser
+from metadata_parser.extract_acq_metadata import AcqMetadataParser
 import subprocess
 import yaml
+from default_image_processor import DefaultImageProcessor
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -112,7 +118,8 @@ def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
 
     # handle acquisition metadata file parsing
     input_file = open(input_path[0])
-    acq_metadata = acq_parser.parse_acq_file(input_file)
+    acq_parser = AcqMetadataParser()
+    acq_metadata = acq_parser.extract_metadata(input_file)
 
     input_path = glob.glob(os.path.join(dir_path,'*log.txt'))
     print input_path
@@ -177,7 +184,8 @@ def upload_data_dir(data_broker, dir_path, import_images=True):
             break
 
     print dir_path, exp_file
-    log_metadata = log_parser.extract_log_metadata(os.path.join(dir_path, exp_file))
+    log_parser = LogMetadataParser()
+    log_metadata = log_parser.extract_metadata(os.path.join(dir_path, exp_file))
     # create the dataset using metadata values
     print dir(log_metadata)
     dataset_name = log_metadata.aim
@@ -232,14 +240,16 @@ def main():
     broker = OMERODataBroker(username=conn_settings['username'],
                              password=conn_settings['password'],
                              host=conn_settings['server'],
-                             port=conn_settings['port'])
-
+                             port=conn_settings['port'],
+                             image_processor=DefaultImageProcessor())
+    print "hello"
     broker.open_omero_session()
 
     # dir_path = os.path.join("","/var","data_dir")
+    dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
     upload_data_dir(broker, dir_path, import_images=False)
     # upload_metadata(broker, dir_path)
-
+    print "hello2"
     broker.close_omero_session()
 
 

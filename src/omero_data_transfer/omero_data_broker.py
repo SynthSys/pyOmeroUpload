@@ -371,7 +371,8 @@ def main():
 
     broker = OMERODataBroker(username=conn_settings['username'],
                              password=conn_settings['password'],
-                             host=conn_settings['server'], port=conn_settings['port'])
+                             host=conn_settings['server'], port=conn_settings['port'],
+                             image_processor=DefaultImageProcessor())
     broker.open_omero_session()
     broker.close_omero_session()
 
