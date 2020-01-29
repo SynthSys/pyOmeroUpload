@@ -1,21 +1,22 @@
 from image_processor import ImageProcessor
 import glob
 import abc
+import os
 
 class DefaultImageProcessor(ImageProcessor):
 
     def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
-        update_service = self.SESSION.getUpdateService()
-        pixels_service = self.SESSION.getPixelsService()
+        update_service = omero_session.getUpdateService()
+        pixels_service = omero_session.getPixelsService()
 
         common_path = os.path.commonprefix(file_path)
         print common_path
 
         cube_dirs = glob.glob(''.join([common_path,'*']))
 
-        query_service = self.SESSION.getQueryService()
-        update_service = self.SESSION.getUpdateService()
-        pixels_service = self.SESSION.getPixelsService()
+        query_service = omero_session.getQueryService()
+        update_service = omero_session.getUpdateService()
+        pixels_service = omero_session.getPixelsService()
 
         for path in cube_dirs:
             self.upload_dir_as_images(query_service, update_service, pixels_service,
@@ -23,7 +24,7 @@ class DefaultImageProcessor(ImageProcessor):
 
 
         # adapted from script_utils
-    def upload_dir_as_images(self, queryService, updateService,
+    def upload_dir_as_images(self, omero_session, queryService, updateService,
                           pixelsService, path, dataset=None, convert_to_uint16=False):
         """
         Reads all the images in the directory specified by 'path' and
@@ -163,7 +164,7 @@ class DefaultImageProcessor(ImageProcessor):
             "select p.id from Image i join i.pixels p where i.id = :id",
             params)[0][0].val
 
-        rawPixelStore = self.SESSION.createRawPixelsStore()
+        rawPixelStore = omero_session.createRawPixelsStore()
         rawPixelStore.setPixelsId(pixelsId, True)
         try:
             for theC in range(sizeC):
@@ -207,7 +208,7 @@ class DefaultImageProcessor(ImageProcessor):
                 if theC in colourMap:
                     rgba = colourMap[theC]
                 try:
-                    renderingEngine = self.SESSION.createRenderingEngine()
+                    renderingEngine = omero_session.createRenderingEngine()
                     script_utils.resetRenderingSettings(
                         renderingEngine, pixelsId, theC, minValue, maxValue, rgba)
                 finally:

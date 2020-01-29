@@ -269,7 +269,7 @@ class OMERODataBroker:
                 self.upload_dir_as_images(query_service, update_service, pixels_service,
                                      path, dataset, convert_to_uint16=True)
             '''
-            self.IMAGE_PROCESSOR.processImages(self.SESSION, files_to_upload, dataset)
+            self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)
         else:
             # initialise the upload_image function with the current dataset
             # since the pool.map function won't accept multiple arguments
