@@ -7,6 +7,17 @@ class MetadataParser(object):
     def extract_metadata(self, filename):
         raise NotImplementedError('users must define extract_metadata to use this base class')
 
+    @classmethod
+    def get_str_array_val(cls, metadata_val):
+        str_val = ''
+
+        if isinstance(metadata_val, list):
+            str_val = metadata_val[0]
+        elif isinstance(metadata_val, str):
+            str_val = metadata_val
+
+        return str_val
+
     # construct the KVPs strings from the main key (e.g. 'Brightfield') and the
     # metadata values, so all KVPs are returned as an array of pairs arrays
     @classmethod
@@ -27,16 +38,16 @@ class MetadataParser(object):
                 if len(cur_kvp_val.strip()) == 0:
                     cur_kvp_val = kvps[0]
                 else:
-                    cur_kvp_val = ';'.join([cur_kvp_val, get_str_array_val(kvp_str.strip())])
+                    cur_kvp_val = ';'.join([cur_kvp_val, cls.get_str_array_val(kvp_str.strip())])
             elif len(kvps) > 1:
                 # append the current KVP into the list
-                kvp_list.append([cur_kvp_key, get_str_array_val(cur_kvp_val)])
+                kvp_list.append([cur_kvp_key, cls.get_str_array_val(cur_kvp_val)])
 
                 for i in range(0, len(kvps)/2):
                     cur_kvp_key = kvps[0+i]
                     cur_kvp_val = kvps[1+i]
 
-                    kvp_list.append([cur_kvp_key, get_str_array_val(cur_kvp_val)])
+                    kvp_list.append([cur_kvp_key, cls.get_str_array_val(cur_kvp_val)])
 
         print kvp_list
 

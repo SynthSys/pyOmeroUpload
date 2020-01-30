@@ -32,16 +32,6 @@ AttributeKVP = namedtuple('AttributeKVP',
                                          'metadata_obj cur_dict_key cur_metadata_vals')
 
 class TemplateMetadataParser(MetadataParser):
-    def get_str_array_val(self, metadata_val):
-        str_val = ''
-
-        if isinstance(metadata_val, list):
-            str_val = metadata_val[0]
-        elif isinstance(metadata_val, str):
-            str_val = metadata_val
-
-        return str_val
-
 
     def create_acq_metadata_obj(self, metadata):
         acq_metadata = namedtuple('AcqMetadata', [], verbose=False)

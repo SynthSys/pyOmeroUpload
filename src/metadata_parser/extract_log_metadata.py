@@ -76,17 +76,6 @@ ACQ_METADATA_CONFIG = {
 
 class LogMetadataParser(MetadataParser):
 
-    def get_str_array_val(self, metadata_val):
-        str_val = ''
-
-        if isinstance(metadata_val, list):
-            str_val = metadata_val[0]
-        elif isinstance(metadata_val, str):
-            str_val = metadata_val
-
-        return str_val
-
-
     def create_log_metadata_obj(self, metadata):
         log_metadata = namedtuple('LogMetadata', [], verbose=False)
 

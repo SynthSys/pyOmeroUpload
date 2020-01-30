@@ -61,17 +61,6 @@ def generate_cli_args(files_to_upload, dirs_to_upload, dataset):
     return args
 
 
-def get_str_array_val(metadata_val):
-    str_val = ''
-
-    if isinstance(metadata_val, list):
-        str_val = metadata_val[0]
-    elif isinstance(metadata_val, str):
-        str_val = metadata_val
-
-    return str_val
-
-
 def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
 
 
