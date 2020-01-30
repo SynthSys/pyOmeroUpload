@@ -7,13 +7,11 @@ sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 print sys.path
 
 import os
-import glob
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 import subprocess
 import yaml
-from omero_data_transfer.default_image_processor import DefaultImageProcessor
-from metadata_parser.extract_log_metadata import LogMetadataParser
-from metadata_parser.extract_acq_metadata import AcqMetadataParser
+from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
+from metadata_parser.aggregate_metadata import MetadataAggregator as metadata_parser_impl
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -113,20 +111,7 @@ def build_kvps(kvp_key, metadata_kvps):
 
 
 def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
-    input_path = glob.glob(os.path.join(dir_path,'*Acq.txt'))
-    print input_path
 
-    # handle acquisition metadata file parsing
-    # input_file = open(input_path[0])
-    acq_parser = AcqMetadataParser()
-    acq_metadata = acq_parser.extract_metadata(input_path[0])
-
-    input_path = glob.glob(os.path.join(dir_path,'*log.txt'))
-    print input_path
-
-    # handle acquisition metadata file parsing
-    # log_metadata = log_parser.extract_log_metadata(input_path[0])
-    print acq_metadata
 
     data_broker.open_omero_session()
 
@@ -173,11 +158,11 @@ def upload_data_dir(data_broker, dir_path, import_images=True):
             break
 
     print dir_path, exp_file
-    log_parser = LogMetadataParser()
-    log_metadata = log_parser.extract_metadata(os.path.join(dir_path, exp_file))
+    metadata_parser = metadata_parser_impl()
+    metadata = metadata_parser.extract_metadata(dir_path)
     # create the dataset using metadata values
-    print dir(log_metadata)
-    dataset_name = log_metadata.aim
+    print dir(metadata)
+    dataset_name = metadata.aim
     print dataset_name
 
     try:
@@ -201,7 +186,7 @@ def upload_data_dir(data_broker, dir_path, import_images=True):
 
         dataset_id = str(dataset_obj.getId().getValue())
         print dataset_id
-        upload_metadata(dataset_id, data_broker, dir_path, log_metadata)
+        upload_metadata(dataset_id, data_broker, dir_path, metadata)
 
         # if the image data files are to be imported as is in their existing format,
         # use the Java jar client with CLI arguments
@@ -232,7 +217,7 @@ def main():
                              password=conn_settings['password'],
                              host=conn_settings['server'],
                              port=conn_settings['port'],
-                             image_processor=DefaultImageProcessor())
+                             image_processor=image_processor_impl())
     print "hello"
     broker.open_omero_session()
 
