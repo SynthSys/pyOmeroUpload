@@ -134,22 +134,11 @@ def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
     data_broker.add_tags(log_metadata.tags, 'Dataset', dataset_id)
 
     # create tables as file annotation attachments
-    table = data_broker.create_table(dataset_id, acq_metadata.positions, 'positions')
-    table = data_broker.create_table(dataset_id, acq_metadata.channels, 'channels')
-    table = data_broker.create_table(dataset_id, acq_metadata.zsections, 'zsections')
-    table = data_broker.create_table(dataset_id, acq_metadata.pump_init, 'pumpstart')
+    for key in acq_metadata.table_dict:
+        table = data_broker.create_table(dataset_id, table_dict[key], key)
 
     # do key:value pairs
-    kvp_list = build_kvps('Brightfield', log_metadata.brightfield)
-    kvp_list.extend(build_kvps('DIC', log_metadata.dic))
-    kvp_list.extend(build_kvps('GFP', log_metadata.gfp))
-    kvp_list.extend(build_kvps('GFPFast', log_metadata.gfpfast))
-    kvp_list.extend(build_kvps('CY5', log_metadata.cy5))
-
-    kvp_list.append(['Strain', log_metadata.strain])
-    kvp_list.append(['Project', log_metadata.project])
-    kvp_list.append(['Experiment Start Date', log_metadata.exp_start_date])
-    kvp_list.append(['Number of pumps', str(acq_metadata.npumps)])
+    kvp_list = log_metadata.kvp_list
 
     print kvp_list
     data_broker.add_kvps(kvp_list, 'Dataset', dataset_id)

@@ -8,7 +8,7 @@ class LogMetadata(tuple):
     __slots__ = ()
 
     _fields = ('aim', 'strain', 'comments', 'brightfield', 'dic', 'gfp', 'gfpfast', 'cy5',
-               'project', 'tags', 'exp_start_date')
+               'project', 'tags', 'exp_start_date', 'kvp_list')
 
     def __new__(_cls):
         'Create new instance of Point(x, y)'

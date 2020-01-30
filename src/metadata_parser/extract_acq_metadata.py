@@ -245,6 +245,10 @@ class AcqMetadataParser(MetadataParser):
         acq_annot.pump_init = pump_start_table
         acq_annot.switch_params = dict(switch_params)
 
+        acq_annot.table_dict = dict()
+        acq_annot.table_dict = {'channels': channel_table, 'zsections': zsect_table,
+            'positions':points_table, 'pumpstart':pump_start_table}
+
         return acq_annot
 
 
