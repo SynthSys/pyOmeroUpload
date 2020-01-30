@@ -110,11 +110,11 @@ class LogMetadataParser(MetadataParser):
         # attributes used directly in OMERO
         log_metadata.tags = metadata['omero tags']
 
-        kvp_list = build_kvps('Brightfield', log_metadata.brightfield)
-        kvp_list.extend(build_kvps('DIC', log_metadata.dic))
-        kvp_list.extend(build_kvps('GFP', log_metadata.gfp))
-        kvp_list.extend(build_kvps('GFPFast', log_metadata.gfpfast))
-        kvp_list.extend(build_kvps('CY5', log_metadata.cy5))
+        kvp_list = self.build_kvps('Brightfield', log_metadata.brightfield)
+        kvp_list.extend(self.build_kvps('DIC', log_metadata.dic))
+        kvp_list.extend(self.build_kvps('GFP', log_metadata.gfp))
+        kvp_list.extend(self.build_kvps('GFPFast', log_metadata.gfpfast))
+        kvp_list.extend(self.build_kvps('CY5', log_metadata.cy5))
 
         kvp_list.append(['Strain', log_metadata.strain])
         kvp_list.append(['Project', log_metadata.project])
