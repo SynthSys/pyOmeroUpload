@@ -3,7 +3,7 @@
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 print sys.path
 
 import os
@@ -61,20 +61,20 @@ def generate_cli_args(files_to_upload, dirs_to_upload, dataset):
     return args
 
 
-def upload_metadata(dataset_id, data_broker, dir_path, log_metadata):
+def upload_metadata(dataset_id, data_broker, dir_path, metadata):
 
 
     data_broker.open_omero_session()
 
     # add tags to dataset
-    data_broker.add_tags(log_metadata.tags, 'Dataset', dataset_id)
+    data_broker.add_tags(metadata.tags, 'Dataset', dataset_id)
 
     # create tables as file annotation attachments
-    for key in acq_metadata.table_dict:
-        table = data_broker.create_table(dataset_id, table_dict[key], key)
+    for key in metadata.table_dict:
+        table = data_broker.create_table(dataset_id, metadata.table_dict[key], key)
 
     # do key:value pairs
-    kvp_list = log_metadata.kvp_list
+    kvp_list = metadata.kvp_list
 
     print kvp_list
     data_broker.add_kvps(kvp_list, 'Dataset', dataset_id)

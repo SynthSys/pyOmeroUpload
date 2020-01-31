@@ -35,18 +35,29 @@ class MetadataAggregator(MetadataParser):
         log_metadata = log_parser.extract_metadata(input_path[0])
         print log_metadata
 
-        merged_metadata = merge_object_properties(log_metadata, acq_metadata)
+        merged_metadata = self.merge_object_properties(log_metadata, acq_metadata)
 
         return merged_metadata
 
-    def merge_object_properties(object_to_merge_from, object_to_merge_to):
+    def merge_object_properties(self, object_to_merge_from, object_to_merge_to):
         """
         Used to copy properties from one object to another if there isn't a naming conflict;
         """
         for property in object_to_merge_from.__dict__:
             #Check to make sure it can't be called... ie a method.
             #Also make sure the object_to_merge_to doesn't have a property of the same name.
-            if not callable(object_to_merge_from.__dict__[property]) and not hasattr(object_to_merge_to, property):
-                setattr(object_to_merge_to, property, getattr(object_to_merge_from, property))
+            if not callable(object_to_merge_from.__dict__[property]):
+                if not hasattr(object_to_merge_to, property):
+                    setattr(object_to_merge_to, property, getattr(object_to_merge_from, property))
+                else:
+                    from_attr = getattr(object_to_merge_from, property)
+                    to_attr = getattr(object_to_merge_to, property)
+                    if type(from_attr) is dict:
+                        new_dict = from_attr.copy()
+                        new_dict.update(to_attr)
+                        setattr(object_to_merge_to, property, new_dict)
+                    elif type(from_attr) is list:
+                        new_list = from_attr + to_attr
+                        setattr(object_to_merge_to, property, new_list)
 
         return object_to_merge_to

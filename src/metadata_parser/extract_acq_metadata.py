@@ -249,6 +249,10 @@ class AcqMetadataParser(MetadataParser):
         acq_annot.table_dict = {'channels': channel_table, 'zsections': zsect_table,
             'positions':points_table, 'pumpstart':pump_start_table}
 
+        kvp_list = self.build_kvps('Number of pumps', str(npumps))
+
+        acq_annot.kvp_list = kvp_list
+
         return acq_annot
 
 

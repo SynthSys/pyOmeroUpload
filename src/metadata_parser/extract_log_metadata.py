@@ -108,9 +108,8 @@ class LogMetadataParser(MetadataParser):
         kvp_list.append(['Strain', log_metadata.strain])
         kvp_list.append(['Project', log_metadata.project])
         kvp_list.append(['Experiment Start Date', log_metadata.exp_start_date])
-        kvp_list.append(['Number of pumps', str(acq_metadata.npumps)])
 
-        log_metadata.kvps_list = kvp_list
+        log_metadata.kvp_list = kvp_list
 
         return log_metadata
 

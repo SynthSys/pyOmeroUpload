@@ -8,7 +8,7 @@ class AcqAnnotation(tuple):
     __slots__ = ()
 
     _fields = ('channels', 'zsections', 'times', 'positions', 'npumps',
-               'pump_init', 'switch_params', 'table_dict')
+               'pump_init', 'switch_params', 'table_dict', 'kvp_list')
 
     def __new__(_cls):
         'Create new instance of Point(x, y)'
