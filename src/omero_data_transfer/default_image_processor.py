@@ -8,6 +8,8 @@ from omero import model
 import numpy as np
 import omero.util.script_utils as script_utils
 import logging
+import re
+from operator import itemgetter
 
 logging.basicConfig(filename='example.log',level=logging.DEBUG)
 logging.debug('This message should go to the log file')
@@ -48,17 +50,6 @@ class DefaultImageProcessor(ImageProcessor):
         @param dataset  the OMERO dataset, if we want to put images somewhere.
                         omero.model.DatasetI
         """
-        import re
-
-        regex_token = re.compile(r'(?P<Token>.+)\.')
-        # regex_time = re.compile(r'T(?P<T>\d+)')
-        regex_time = re.compile(r'.*_(?P<T>\d+)_\w+\d*_\d+\.')
-        # regex_channel = re.compile(r'_C(?P<C>.+?)(_|$)')
-        regex_channel = re.compile(r'.*_\d+_(?P<C>\w+\d*)_\d+\.')
-        # regex_zslice = re.compile(r'_Z(?P<Z>\d+)')
-        regex_zslice = re.compile(r'.*_\d+_\w+\d*_(?P<Z>\d+)\.')
-        regex_pos = re.compile(r'.*/(?P<pos>pos\d+)/.*')
-
         # assume 1 image in this folder for now.
         # Make a single map of all images. key is (z,c,t). Value is image path.
         imageMap = {}
@@ -78,11 +69,10 @@ class DefaultImageProcessor(ImageProcessor):
         # process the names and populate our imagemap
         for f in os.listdir(path):
             fullpath = os.path.join(path, f)
-            tSearch = regex_time.search(f)
-            cSearch = regex_channel.search(f)
-            zSearch = regex_zslice.search(f)
-            tokSearch = regex_token.search(f)
-            posSearch = regex_pos.search(fullpath)
+            search_res = self.run_regex_search(fullpath, f)
+            tSearch, cSearch, zSearch, tokSearch, posSearch = \
+                itemgetter('tSearch', 'cSearch', 'zSearch', 'tokSearch', 'posSearch')(search_res)
+
             pos = posSearch.group('pos')
 
             if f.endswith(".jpg"):
@@ -247,3 +237,25 @@ class DefaultImageProcessor(ImageProcessor):
             update_service.saveAndReturnObject(link)
 
         return imageId
+
+    def run_regex_search(self, full_path, file):
+        regex_token = re.compile(r'(?P<Token>.+)\.')
+        # regex_time = re.compile(r'T(?P<T>\d+)')
+        regex_time = re.compile(r'.*_(?P<T>\d+)_\w+\d*_\d+\.')
+        # regex_channel = re.compile(r'_C(?P<C>.+?)(_|$)')
+        regex_channel = re.compile(r'.*_\d+_(?P<C>\w+\d*)_\d+\.')
+        # regex_zslice = re.compile(r'_Z(?P<Z>\d+)')
+        regex_zslice = re.compile(r'.*_\d+_\w+\d*_(?P<Z>\d+)\.')
+        regex_pos = re.compile(r'.*/(?P<pos>pos\d+)/.*')
+
+        tSearch = regex_time.search(file)
+        cSearch = regex_channel.search(file)
+        zSearch = regex_zslice.search(file)
+        tokSearch = regex_token.search(file)
+        posSearch = regex_pos.search(full_path)
+
+        return {'tSearch': tSearch,
+                'cSearch': cSearch,
+                'zSearch': zSearch,
+                'tokSearch': tokSearch,
+                'posSearch': posSearch}
