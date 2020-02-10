@@ -133,63 +133,10 @@ class DefaultImageProcessor(ImageProcessor):
         imageId = pixels_service.createImage(
             sizeX, sizeY, sizeZ, sizeT, channelList,
             pixelsType, imageName, description)
-        params = sys.ParametersI()
-        params.addId(imageId)
-        pixelsId = query_service.projection(
-            "select p.id from Image i join i.pixels p where i.id = :id",
-            params)[0][0].val
 
-        rawPixelStore = omero_session.createRawPixelsStore()
-        rawPixelStore.setPixelsId(pixelsId, True)
-        try:
-            for theC in range(sizeC):
-                minValue = 0
-                maxValue = 0
-                for theZ in range(sizeZ):
-                    zIndex = theZ + zStart
-                    for theT in range(sizeT):
-                        tIndex = theT + tStart
-                        if rgb:
-                            c = "0"
-                        else:
-                            c = channels[theC]
-                        if (zIndex, c, tIndex) in imageMap:
-                            imagePath = imageMap[(zIndex, c, tIndex)]
-                            if rgb:
-                                SU_LOG.debug(
-                                    "Getting rgb plane from: %s" % imagePath)
-                                plane2D = script_utils.getPlaneFromImage(imagePath, theC)
-                            else:
-                                SU_LOG.debug("Getting plane from: %s" % imagePath)
-                                plane2D = script_utils.getPlaneFromImage(imagePath)
-                        else:
-                            SU_LOG.debug(
-                                "Creating blank plane for .",
-                                theZ, channels[theC], theT)
-                            plane2D = np.zeros((sizeY, sizeX))
-                        SU_LOG.debug(
-                            "Uploading plane: theZ: %s, theC: %s, theT: %s"
-                            % (theZ, theC, theT))
-
-                        if convert_to_uint16 == True:
-                            plane2D = np.array(plane2D, dtype=np.uint16)
-
-                        script_utils.upload_plane(rawPixelStore, plane2D, theZ, theC, theT)
-                        minValue = min(minValue, plane2D.min())
-                        maxValue = max(maxValue, plane2D.max())
-                pixels_service.setChannelGlobalMinMax(
-                    pixelsId, theC, float(minValue), float(maxValue))
-                rgba = None
-                if theC in colourMap:
-                    rgba = colourMap[theC]
-                try:
-                    renderingEngine = omero_session.createRenderingEngine()
-                    script_utils.resetRenderingSettings(
-                        renderingEngine, pixelsId, theC, minValue, maxValue, rgba)
-                finally:
-                    renderingEngine.close()
-        finally:
-            rawPixelStore.close()
+        pixelsId = self.upload_image_pixels(imageId, query_service, omero_session,
+            pixels_service, rgb, imageMap, sizeC, sizeZ, sizeT, sizeX, sizeY,
+            channels, colourMap, convert_to_uint16)
 
         # add channel names
         pixels = pixels_service.retrievePixDescription(pixelsId)
@@ -275,3 +222,70 @@ class DefaultImageProcessor(ImageProcessor):
             pixelsType = query_service.findByQuery(query, None)
 
         return pixelsType
+    
+    def upload_image_pixels(self, imageId, query_service, omero_session,
+        pixels_service, rgb, imageMap, sizeC, sizeZ, sizeT, sizeX, sizeY,
+        channels, colourMap, convert_to_uint16=False):
+        params = sys.ParametersI()
+        params.addId(imageId)
+        pixelsId = query_service.projection(
+            "select p.id from Image i join i.pixels p where i.id = :id",
+            params)[0][0].val
+
+        rawPixelStore = omero_session.createRawPixelsStore()
+        rawPixelStore.setPixelsId(pixelsId, True)
+
+        zStart = 1  # could be 0 or 1 ?
+        tStart = 1
+
+        try:
+            for theC in range(sizeC):
+                minValue = 0
+                maxValue = 0
+                for theZ in range(sizeZ):
+                    zIndex = theZ + zStart
+                    for theT in range(sizeT):
+                        tIndex = theT + tStart
+                        if rgb:
+                            c = "0"
+                        else:
+                            c = channels[theC]
+                        if (zIndex, c, tIndex) in imageMap:
+                            imagePath = imageMap[(zIndex, c, tIndex)]
+                            if rgb:
+                                SU_LOG.debug(
+                                    "Getting rgb plane from: %s" % imagePath)
+                                plane2D = script_utils.getPlaneFromImage(imagePath, theC)
+                            else:
+                                SU_LOG.debug("Getting plane from: %s" % imagePath)
+                                plane2D = script_utils.getPlaneFromImage(imagePath)
+                        else:
+                            SU_LOG.debug(
+                                "Creating blank plane for .",
+                                theZ, channels[theC], theT)
+                            plane2D = np.zeros((sizeY, sizeX))
+                        SU_LOG.debug(
+                            "Uploading plane: theZ: %s, theC: %s, theT: %s"
+                            % (theZ, theC, theT))
+
+                        if convert_to_uint16 == True:
+                            plane2D = np.array(plane2D, dtype=np.uint16)
+
+                        script_utils.upload_plane(rawPixelStore, plane2D, theZ, theC, theT)
+                        minValue = min(minValue, plane2D.min())
+                        maxValue = max(maxValue, plane2D.max())
+                pixels_service.setChannelGlobalMinMax(
+                    pixelsId, theC, float(minValue), float(maxValue))
+                rgba = None
+                if theC in colourMap:
+                    rgba = colourMap[theC]
+                try:
+                    renderingEngine = omero_session.createRenderingEngine()
+                    script_utils.resetRenderingSettings(
+                        renderingEngine, pixelsId, theC, minValue, maxValue, rgba)
+                finally:
+                    renderingEngine.close()
+        finally:
+            rawPixelStore.close()
+        
+        return pixelsId
