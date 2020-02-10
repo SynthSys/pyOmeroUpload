@@ -119,26 +119,13 @@ class DefaultImageProcessor(ImageProcessor):
             plane = script_utils.getPlaneFromImage(fullpath, 0)
         else:
             plane = script_utils.getPlaneFromImage(fullpath)
-        pType = plane.dtype.name
-        # look up the PixelsType object from DB
-        # omero::model::PixelsType
-        pixelsType = query_service.findByQuery(
-            "from PixelsType as p where p.value='%s'" % pType, None)
-        if pixelsType is None and pType.startswith("float"):  # e.g. float32
-            # omero::model::PixelsType
-            pixelsType = query_service.findByQuery(
-                "from PixelsType as p where p.value='%s'" % script_utils.PixelsTypefloat, None)
-        if pixelsType is None:
-            SU_LOG.warn("Unknown pixels type for: %s" % pType)
-            return
+
+        pixelsType = self.get_pixels_type(plane, query_service, convert_to_uint16)
+
         sizeY, sizeX = plane.shape
 
         SU_LOG.debug("sizeX: %s  sizeY: %s sizeZ: %s  sizeC: %s  sizeT: %s"
                      % (sizeX, sizeY, sizeZ, sizeC, sizeT))
-
-        if convert_to_uint16 == True:
-            query = "from PixelsType as p where p.value='uint16'"
-            pixelsType = query_service.findByQuery(query, None)
 
         # code below here is very similar to combineImages.py
         # create an image in OMERO and populate the planes with numpy 2D arrays
@@ -268,3 +255,23 @@ class DefaultImageProcessor(ImageProcessor):
 
         return {'channels': channels,
                 'colourMap': colourMap}
+
+    def get_pixels_type(self, plane, query_service, convert_to_uint16=False):
+        pType = plane.dtype.name
+        # look up the PixelsType object from DB
+        # omero::model::PixelsType
+        pixelsType = query_service.findByQuery(
+            "from PixelsType as p where p.value='%s'" % pType, None)
+        if pixelsType is None and pType.startswith("float"):  # e.g. float32
+            # omero::model::PixelsType
+            pixelsType = query_service.findByQuery(
+                "from PixelsType as p where p.value='%s'" % script_utils.PixelsTypefloat, None)
+        if pixelsType is None:
+            SU_LOG.warn("Unknown pixels type for: %s" % pType)
+            return
+
+        if convert_to_uint16 == True:
+            query = "from PixelsType as p where p.value='uint16'"
+            pixelsType = query_service.findByQuery(query, None)
+
+        return pixelsType
