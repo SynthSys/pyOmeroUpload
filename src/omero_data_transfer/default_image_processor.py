@@ -102,21 +102,8 @@ class DefaultImageProcessor(ImageProcessor):
                 tokens.append(tokSearch.group('Token'))
             imageMap[(theZ, cName, theT)] = fullpath
 
-        colourMap = {}
-        if not rgb:
-            channels = list(channelSet)
-            # see if we can guess what colour the channels should be, based on
-            # name.
-            for i, c in enumerate(channels):
-                if c == 'rfp':
-                    colourMap[i] = script_utils.COLOURS["Red"]
-                if c == 'gfp':
-                    colourMap[i] = script_utils.COLOURS["Green"]
-        else:
-            channels = ("red", "green", "blue")
-            colourMap[0] = script_utils.COLOURS["Red"]
-            colourMap[1] = script_utils.COLOURS["Green"]
-            colourMap[2] = script_utils.COLOURS["Blue"]
+        chans_map = self.find_channel_map(rgb, channelSet)
+        channels, colourMap = itemgetter('channels', 'colourMap')(chans_map)
 
         sizeC = len(channels)
 
@@ -259,3 +246,25 @@ class DefaultImageProcessor(ImageProcessor):
                 'zSearch': zSearch,
                 'tokSearch': tokSearch,
                 'posSearch': posSearch}
+
+    def find_channel_map(self, rgb, channelSet):
+        channels = []
+        colourMap = {}
+
+        if not rgb:
+            channels = list(channelSet)
+            # see if we can guess what colour the channels should be, based on
+            # name.
+            for i, c in enumerate(channels):
+                if c == 'rfp':
+                    colourMap[i] = script_utils.COLOURS["Red"]
+                if c == 'gfp':
+                    colourMap[i] = script_utils.COLOURS["Green"]
+        else:
+            channels = ("red", "green", "blue")
+            colourMap[0] = script_utils.COLOURS["Red"]
+            colourMap[1] = script_utils.COLOURS["Green"]
+            colourMap[2] = script_utils.COLOURS["Blue"]
+
+        return {'channels': channels,
+                'colourMap': colourMap}
