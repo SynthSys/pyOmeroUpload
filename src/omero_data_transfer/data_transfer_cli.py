@@ -6,8 +6,12 @@ import sys
 #sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 print sys.path
 
+import os
 import argparse
+import yaml
 from data_transfer_manager import DataTransferManager
+from omero_data_broker import OMERODataBroker
+from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -50,16 +54,21 @@ parser.add_argument('-i', '--image-processor-class', dest='image_processor_class
     help="specifies the name of the custom image processor class")
 
 args = parser.parse_args()
+data_path = args.data_path
+dataset_name = args.dataset_name
 
-if args.data_path is not None and args.dataset_name is not None:
+if data_path is not None and dataset_name is not None:
     # validate args
-    if args.data_path.strip() is "":
+    if data_path.strip() is "":
         print "Data path is empty"
         quit()
 
-    if args.dataset_name.strip() is "":
+    if dataset_name.strip() is "":
         print "Dataset name is empty"
         quit()
+
+    with open(CONFIG_FILE, 'r') as cfg:
+        CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
 
     conn_settings = CONFIG['test_settings']['omero_conn']
     broker = OMERODataBroker(username=conn_settings['username'],
