@@ -1,7 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# override installed pyOmeroUpload package
+import sys
+#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+print sys.path
+
 import argparse
+from data_transfer_manager import DataTransferManager
+
+PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
+
+# alter below CLIENT_TYPE var to switch between executable jars
+#CLIENT_TYPE = "importer"
+CLIENT_TYPE = "cli"
+
+CLIENT_JAR_NAME = ".".join(["-".join(["omero", CLIENT_TYPE]), "jar"])
+CLIENT_JAR_PATH = os.path.join(PROJECT_DIR, 'resources', CLIENT_JAR_NAME)
+CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+CONFIG = {}
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -34,11 +51,33 @@ parser.add_argument('-i', '--image-processor-class', dest='image_processor_class
 
 args = parser.parse_args()
 
-if args.data_path:
-    print args.data_path
+if args.data_path is not None and args.dataset_name is not None:
+    # validate args
+    if args.data_path.strip() is "":
+        print "Data path is empty"
+        quit()
 
-if args.dataset_name:
-    print args.dataset_name
+    if args.dataset_name.strip() is "":
+        print "Dataset name is empty"
+        quit()
+
+    conn_settings = CONFIG['test_settings']['omero_conn']
+    broker = OMERODataBroker(username=conn_settings['username'],
+                             password=conn_settings['password'],
+                             host=conn_settings['server'],
+                             port=conn_settings['port'],
+                             image_processor=image_processor_impl())
+    print "hello"
+    broker.open_omero_session()
+
+    # dir_path = os.path.join("","/var","data_dir")
+    # dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
+
+    data_transfer_manager = DataTransferManager()
+    data_transfer_manager.upload_data_dir(broker, data_path, import_images=False)
+    # upload_metadata(broker, dir_path)
+    print "hello2"
+    broker.close_omero_session()
 
 if args.hypercube:
     print args.hypercube
