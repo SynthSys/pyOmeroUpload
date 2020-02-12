@@ -11,7 +11,6 @@ import argparse
 import yaml
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
-from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -82,6 +81,7 @@ if data_path is not None and dataset_name is not None:
         print sys.path
 
         from importlib import import_module
+        parser_class, image_processor_impl = None, None
 
         if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
             # user must have a submodule called 'custom_metadata_parser' containing a class
@@ -90,12 +90,18 @@ if data_path is not None and dataset_name is not None:
             from custom_metadata_parser import CustomMetadataParser
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
             print cls
+            parser_class = cls
+        else:
+            from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
 
         if args.custom_image_processor is not None and args.custom_image_processor == True:
             # user must have a submodule called 'custom_image_processor' containing a class
             # 'CustomImageProcessor' that implements the ImageProcessor ABC 
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
             print cls
+            image_processor_impl = cls
+        else:
+            from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
         '''
         import glob
@@ -145,20 +151,8 @@ if data_path is not None and dataset_name is not None:
     # dir_path = os.path.join("","/var","data_dir")
     # dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
-    data_transfer_manager = DataTransferManager(parser_name=parser_class)
+    data_transfer_manager = DataTransferManager(parser_class=parser_class)
     data_transfer_manager.upload_data_dir(broker, data_path, import_images=False)
     # upload_metadata(broker, dir_path)
     print "hello2"
     broker.close_omero_session()
-
-if args.hypercube:
-    print args.hypercube
-
-if args.module_path:
-    print args.module_path
-
-if args.parser_class:
-    print args.parser_class
-
-if args.image_processor_class:
-    print args.image_processor_class

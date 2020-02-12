@@ -31,16 +31,16 @@ with open(CONFIG_FILE, 'r') as cfg:
 class DataTransferManager:
     metadata_parser = metadata_parser_impl()
 
-    def __init__(self, parser_name=None):
+    def __init__(self, parser_class=None):
         print sys.path
-        if parser_name is not None and parser_name.strip() is not '':
+        if parser_class is not None:
             #print sys.modules
             #print getattr(sys.modules[__name__], 'numpy.lib.function_base')
             #metadata_parser_impl = getattr(sys.modules[__name__], parser_name)
 
-            metadata_parser_impl = type(parser_name, (MetadataParser,), {})
+            #metadata_parser_impl = type(parser_name, (MetadataParser,), {})
             print metadata_parser_impl
-            self.metadata_parser = metadata_parser_impl()
+            self.metadata_parser = parser_class()
             #d = {'ABC': numpy.lib.function_base}  # where ABC is the class object
 
             #my_obj = d['ABC']()
