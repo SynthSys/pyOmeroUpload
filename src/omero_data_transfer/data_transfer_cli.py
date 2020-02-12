@@ -3,14 +3,14 @@
 
 # override installed pyOmeroUpload package
 import sys
-#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 print sys.path
 
 import os
 import argparse
 import yaml
-from data_transfer_manager import DataTransferManager
-from omero_data_broker import OMERODataBroker
+from omero_data_transfer.data_transfer_manager import DataTransferManager
+from omero_data_transfer.omero_data_broker import OMERODataBroker
 from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
@@ -85,7 +85,9 @@ if data_path is not None and dataset_name is not None:
 
         if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
             # user must have a submodule called 'custom_metadata_parser' containing a class
-            # 'CustomMetadataParser' that implements the MetadataParser ABC 
+            # 'CustomMetadataParser' that implements the MetadataParser ABC
+            from omero_metadata_parser import metadata_parser
+            from custom_metadata_parser import CustomMetadataParser
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
             print cls
 

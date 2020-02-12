@@ -11,8 +11,8 @@ from omero_data_transfer.omero_data_broker import OMERODataBroker
 import subprocess
 import yaml
 from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
-from metadata_parser.aggregate_metadata import MetadataAggregator as metadata_parser_impl
-from metadata_parser.metadata_parser import MetadataParser
+from omero_metadata_parser.aggregate_metadata import MetadataAggregator as metadata_parser_impl
+from omero_metadata_parser.metadata_parser import MetadataParser
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 

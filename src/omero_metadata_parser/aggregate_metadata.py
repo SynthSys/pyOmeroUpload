@@ -1,9 +1,9 @@
 import os
 import re
 from collections import OrderedDict, namedtuple
-from metadata_parser import MetadataParser
-from extract_acq_metadata import AcqMetadataParser
-from extract_log_metadata import LogMetadataParser
+from omero_metadata_parser.metadata_parser import MetadataParser
+from omero_metadata_parser.extract_acq_metadata import AcqMetadataParser
+from omero_metadata_parser.extract_log_metadata import LogMetadataParser
 import glob
 import abc
 

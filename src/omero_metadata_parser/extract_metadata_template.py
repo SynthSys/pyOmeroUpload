@@ -6,7 +6,7 @@ import datetime as dt
 import ast
 import pandas as pd
 from collections import namedtuple
-from metadata_parser import MetadataParser
+from omero_metadata_parser.metadata_parser import MetadataParser
 
 try:
     from types import SimpleNamespace as Namespace

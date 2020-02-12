@@ -1,7 +1,8 @@
 import os
 import re
 from collections import OrderedDict, namedtuple
-from metadata_parser import MetadataParser
+#import metadata_parser
+from omero_metadata_parser.metadata_parser import MetadataParser
 import abc
 
 import pandas as pd
