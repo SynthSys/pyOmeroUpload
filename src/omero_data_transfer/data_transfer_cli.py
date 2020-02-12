@@ -3,7 +3,7 @@
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
+#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
 print sys.path
 
 import os
@@ -79,16 +79,19 @@ if data_path is not None and dataset_name is not None:
         # add the new module path to sys path
         print module_path
         sys.path.append(module_path)
-        sys.path.insert(0,'/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
         print sys.path
 
         from importlib import import_module
 
         if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
+            # user must have a submodule called 'custom_metadata_parser' containing a class
+            # 'CustomMetadataParser' that implements the MetadataParser ABC 
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
             print cls
 
         if args.custom_image_processor is not None and args.custom_image_processor == True:
+            # user must have a submodule called 'custom_image_processor' containing a class
+            # 'CustomImageProcessor' that implements the ImageProcessor ABC 
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
             print cls
 
