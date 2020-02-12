@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Johnny Hay"
-__copyright__ = "Johnny Hay"
+__copyright__ = "BioRDM"
 __license__ = "mit"
 
 # override installed pyOmeroUpload package

@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+__author__ = "Johnny Hay"
+__copyright__ = "BioRDM"
+__license__ = "mit"
+
 # override installed pyOmeroUpload package
 import sys
 sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
@@ -86,8 +90,6 @@ if data_path is not None and dataset_name is not None:
         if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
             # user must have a submodule called 'custom_metadata_parser' containing a class
             # 'CustomMetadataParser' that implements the MetadataParser ABC
-            from omero_metadata_parser import metadata_parser
-            from custom_metadata_parser import CustomMetadataParser
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
             print cls
             parser_class = cls
@@ -102,39 +104,6 @@ if data_path is not None and dataset_name is not None:
             image_processor_impl = cls
         else:
             from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
-
-        '''
-        import glob
-
-        py_files = glob.glob(os.path.join(module_path,'*.py'))
-
-        new_modules = []
-        for f in py_files:
-            print f
-            import_name = f.replace(os.path.join(module_path,''),'')
-            import_name = import_name.replace('.py','')
-            new_modules.extend([import_name])
-
-        # new_modules = glob.glob(os.path.join(module_path,'*.py'))
-        print 'hello577'
-        # print os.path.join(module_path,'*.py')
-        # print(glob.glob(os.path.join(module_path,'*.py')))
-        print new_modules
-        
-        for (dirpath, dirnames, filenames) in os.walk(module_path):
-            print 'hello578'
-            print filenames
-
-            #new_modules.extend(filenames)
-
-        new_modules = map(__import__, new_modules)
-
-        if args.parser_class is not None and args.parser_class.strip() is not '':
-            parser_class = args.parser_class
-
-        if args.image_processor_class is not None and args.image_processor_class.strip() is not '':
-            image_processor_class = args.image_processor_class  
-        '''
 
     with open(CONFIG_FILE, 'r') as cfg:
         CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)

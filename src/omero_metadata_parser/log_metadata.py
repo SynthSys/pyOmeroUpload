@@ -1,9 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__author__ = "Johnny Hay"
+__copyright__ = "BioRDM"
+__license__ = "mit"
+
 from collections import OrderedDict
 from builtins import property as _property, tuple as _tuple
 from operator import itemgetter as _itemgetter
 
 class LogMetadata(tuple):
-    'AcqAnnotation()'
+    'LogMetadata()'
 
     __slots__ = ()
 

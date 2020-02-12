@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__author__ = "Johnny Hay"
+__copyright__ = "BioRDM"
+__license__ = "mit"
+
 import abc
 
 class ImageProcessor(object):

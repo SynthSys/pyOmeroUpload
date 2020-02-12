@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+__author__ = "Johnny Hay"
+__copyright__ = "BioRDM"
+__license__ = "mit"
+
 # override installed pyOmeroUpload package
 import sys
 sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
@@ -32,18 +36,8 @@ class DataTransferManager:
     metadata_parser = metadata_parser_impl()
 
     def __init__(self, parser_class=None):
-        print sys.path
         if parser_class is not None:
-            #print sys.modules
-            #print getattr(sys.modules[__name__], 'numpy.lib.function_base')
-            #metadata_parser_impl = getattr(sys.modules[__name__], parser_name)
-
-            #metadata_parser_impl = type(parser_name, (MetadataParser,), {})
-            print metadata_parser_impl
             self.metadata_parser = parser_class()
-            #d = {'ABC': numpy.lib.function_base}  # where ABC is the class object
-
-            #my_obj = d['ABC']()
 
     def generate_cli_args(self, files_to_upload, dirs_to_upload, dataset):
         conn_settings = CONFIG['test_settings']['omero_conn']
