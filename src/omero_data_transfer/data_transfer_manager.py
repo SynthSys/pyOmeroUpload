@@ -3,7 +3,7 @@
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 print sys.path
 
 import os
@@ -12,6 +12,7 @@ import subprocess
 import yaml
 from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 from metadata_parser.aggregate_metadata import MetadataAggregator as metadata_parser_impl
+from metadata_parser.metadata_parser import MetadataParser
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
@@ -28,6 +29,21 @@ with open(CONFIG_FILE, 'r') as cfg:
     CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
 
 class DataTransferManager:
+    metadata_parser = metadata_parser_impl()
+
+    def __init__(self, parser_name=None):
+        print sys.path
+        if parser_name is not None and parser_name.strip() is not '':
+            #print sys.modules
+            #print getattr(sys.modules[__name__], 'numpy.lib.function_base')
+            #metadata_parser_impl = getattr(sys.modules[__name__], parser_name)
+
+            metadata_parser_impl = type(parser_name, (MetadataParser,), {})
+            print metadata_parser_impl
+            self.metadata_parser = metadata_parser_impl()
+            #d = {'ABC': numpy.lib.function_base}  # where ABC is the class object
+
+            #my_obj = d['ABC']()
 
     def generate_cli_args(self, files_to_upload, dirs_to_upload, dataset):
         conn_settings = CONFIG['test_settings']['omero_conn']
@@ -104,8 +120,8 @@ class DataTransferManager:
                 break
 
         print dir_path, exp_file
-        metadata_parser = metadata_parser_impl()
-        metadata = metadata_parser.extract_metadata(dir_path)
+        #metadata_parser = metadata_parser_impl()
+        metadata = self.metadata_parser.extract_metadata(dir_path)
         # create the dataset using metadata values
         print dir(metadata)
         dataset_name = metadata.aim

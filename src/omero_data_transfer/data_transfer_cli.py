@@ -3,7 +3,7 @@
 
 # override installed pyOmeroUpload package
 import sys
-#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
 print sys.path
 
 import os
@@ -45,17 +45,19 @@ parser.add_argument('-m', '--module-path', dest='module_path',
     type=str, required=False, metavar='module-path',
     help="specifies the system file path to the directory containing custom classes")
 
-parser.add_argument('-p', '--parser-class', dest='parser_class',
-    type=str, required=False, metavar='parser-class',
-    help="specifies the name of the custom metadata parser class")
+parser.add_argument('-p', '--custom-metadata-parser', dest='custom_metadata_parser',
+    type=bool, required=False, metavar='custom-metadata-parser',
+    help="commands the uploader to use a custom parser class located in the module path")
 
-parser.add_argument('-i', '--image-processor-class', dest='image_processor_class',
-    type=str, required=False, metavar='image-processor-class',
-    help="specifies the name of the custom image processor class")
+parser.add_argument('-i', '--custom-image-processor', dest='custom_image_processor',
+    type=bool, required=False, metavar='custom-image-processor',
+    help="commands the uploader to use a custom image processor class located in the module path")
 
 args = parser.parse_args()
 data_path = args.data_path
 dataset_name = args.dataset_name
+hypercube, custom_metadata_parser, custom_image_processor = False, False, False
+module_path = ''
 
 if data_path is not None and dataset_name is not None:
     # validate args
@@ -66,6 +68,62 @@ if data_path is not None and dataset_name is not None:
     if dataset_name.strip() is "":
         print "Dataset name is empty"
         quit()
+    
+    if args.hypercube is not None and str(args.hypercube).strip() is not '':
+        hypercube = args.hypercube
+    
+    if args.module_path is not None and args.module_path.strip() is not '':
+        # module-path arg must be specified if custom classes are used
+        module_path = args.module_path
+
+        # add the new module path to sys path
+        print module_path
+        sys.path.append(module_path)
+        sys.path.insert(0,'/home/jovyan/work/pyOmeroUpload2/src/metadata_parser')
+        print sys.path
+
+        from importlib import import_module
+
+        if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
+            cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
+            print cls
+
+        if args.custom_image_processor is not None and args.custom_image_processor == True:
+            cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
+            print cls
+
+        '''
+        import glob
+
+        py_files = glob.glob(os.path.join(module_path,'*.py'))
+
+        new_modules = []
+        for f in py_files:
+            print f
+            import_name = f.replace(os.path.join(module_path,''),'')
+            import_name = import_name.replace('.py','')
+            new_modules.extend([import_name])
+
+        # new_modules = glob.glob(os.path.join(module_path,'*.py'))
+        print 'hello577'
+        # print os.path.join(module_path,'*.py')
+        # print(glob.glob(os.path.join(module_path,'*.py')))
+        print new_modules
+        
+        for (dirpath, dirnames, filenames) in os.walk(module_path):
+            print 'hello578'
+            print filenames
+
+            #new_modules.extend(filenames)
+
+        new_modules = map(__import__, new_modules)
+
+        if args.parser_class is not None and args.parser_class.strip() is not '':
+            parser_class = args.parser_class
+
+        if args.image_processor_class is not None and args.image_processor_class.strip() is not '':
+            image_processor_class = args.image_processor_class  
+        '''
 
     with open(CONFIG_FILE, 'r') as cfg:
         CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
@@ -82,7 +140,7 @@ if data_path is not None and dataset_name is not None:
     # dir_path = os.path.join("","/var","data_dir")
     # dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
-    data_transfer_manager = DataTransferManager()
+    data_transfer_manager = DataTransferManager(parser_name=parser_class)
     data_transfer_manager.upload_data_dir(broker, data_path, import_images=False)
     # upload_metadata(broker, dir_path)
     print "hello2"
