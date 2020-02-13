@@ -87,27 +87,18 @@ if data_path is not None and dataset_name is not None:
         print sys.path
 
         from importlib import import_module
-        print 'herekljfdlksjdfask'
-        print args.custom_image_processor
 
         if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
             # user must have a submodule called 'custom_metadata_parser' containing a class
             # 'CustomMetadataParser' that implements the MetadataParser ABC
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
-            print cls
             parser_class = cls
-        else:
-            from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
 
         if args.custom_image_processor is not None and args.custom_image_processor == True:
             # user must have a submodule called 'custom_image_processor' containing a class
             # 'CustomImageProcessor' that implements the ImageProcessor ABC 
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
-            print cls
             image_processor_impl = cls
-        else:
-            print 'heresdfsdfsdfsdfsd'
-            from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
     if parser_class is None:
         from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
@@ -124,7 +115,6 @@ if data_path is not None and dataset_name is not None:
                              host=conn_settings['server'],
                              port=conn_settings['port'],
                              image_processor=image_processor_impl())
-    print "hello"
     broker.open_omero_session()
 
     # dir_path = os.path.join("","/var","data_dir")
@@ -133,5 +123,4 @@ if data_path is not None and dataset_name is not None:
     data_transfer_manager = DataTransferManager(parser_class=parser_class)
     data_transfer_manager.upload_data_dir(broker, data_path, import_images=False)
     # upload_metadata(broker, dir_path)
-    print "hello2"
     broker.close_omero_session()

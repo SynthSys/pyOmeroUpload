@@ -84,15 +84,7 @@ class DataTransferManager:
         # do key:value pairs
         kvp_list = metadata.kvp_list
 
-        print kvp_list
         data_broker.add_kvps(kvp_list, 'Dataset', dataset_id)
-        # data_broker.add_kvps(log_metadata.brightfield, 'Dataset', dataset_id)
-        # data_broker.add_kvps(log_metadata.dic, 'Dataset', dataset_id)
-        # data_broker.add_kvps(log_metadata.gfp, 'Dataset', dataset_id)
-        # data_broker.add_kvps(log_metadata.gfpfast, 'Dataset', dataset_id)
-        # data_broker.add_kvps(log_metadata.cy5, 'Dataset', dataset_id)
-
-        # data_broker.add_kvps(acq_metadata.switch_params, 'Dataset', dataset_id)
 
         data_broker.close_omero_session()
 
