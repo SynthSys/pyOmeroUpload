@@ -25,6 +25,11 @@ logging.warning('And this, too')
 
 SU_LOG = logging.getLogger("omero.util.script_utils")
 
+ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/jpx', 'image/png', 'image/gif', 'image/webp', 'image/x-canon-cr2',
+                       'image/tiff', 'image/bmp', 'image/vnd.ms-photo', 'image/vnd.adobe.photoshop', 'image/x-icon',
+                       'image/heic']
+
+
 class DefaultImageProcessor(ImageProcessor):
 
     def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
@@ -76,6 +81,20 @@ class DefaultImageProcessor(ImageProcessor):
         # process the names and populate our imagemap
         for f in os.listdir(path):
             fullpath = os.path.join(path, f)
+
+            if f.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff')):
+                import filetype
+                ftype = filetype.guess(fullpath)
+                if ftype is None:
+                    print('Cannot guess file type!')
+                    continue
+
+                print('File extension: %s' % ftype.extension)
+                print('File MIME type: %s' % ftype.mime)
+
+                if ftype.mime not in ACCEPTED_MIME_TYPES:
+                    continue
+
             search_res = self.run_regex_search(fullpath, f)
             tSearch, cSearch, zSearch, tokSearch, posSearch = \
                 itemgetter('tSearch', 'cSearch', 'zSearch', 'tokSearch', 'posSearch')(search_res)
