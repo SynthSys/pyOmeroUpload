@@ -67,6 +67,8 @@ def popen(args,
     return subprocess.Popen(command, stdout=stdout, stderr=stderr,
                             cwd=chdir, env=os.environ)
 
+om_java.popen = popen
+
 
 class OMERODataBroker:
 
@@ -114,12 +116,18 @@ class OMERODataBroker:
 
     def get_connection(self):
         extra_config = dict()
+        # extra_config["omero.debug"] = "0"
+        # extra_config = [("omero.debug", "0")]
+        #extra_config["Ice.Config"] = "/dev/null"
         # extra_config["omero.dump"] = "1"
         # extra_config["omero.client.viewer.roi_limit"] = "100"
-        extra_config = "../../tests/ice.config"
-        conn = BlitzGateway(self.USERNAME, self.PASSWORD, host=self.HOST,
-                            port=self.PORT, extra_config=extra_config)
-        conn.connect()
+        # extra_config = "../../tests/ice.config"
+        #conn = BlitzGateway(self.USERNAME, self.PASSWORD, host=self.HOST,
+        #                    port=self.PORT, extra_config=extra_config)
+        c = om_client(host=self.HOST, port=self.PORT,
+                         args=["--Ice.Config=/dev/null", "--omero.debug=1"])
+        c.createSession(self.USERNAME, self.PASSWORD)
+        conn = BlitzGateway(client_obj=c)
 
         # Using secure connection.
         # By default, once we have logged in, data transfer is not encrypted
@@ -247,7 +255,7 @@ class OMERODataBroker:
 
         return table
 
-    def upload_image(self, file_to_upload, dataset, import_original=True):
+    def upload_image(self, file_to_upload, dataset, import_original=False):
         valid_image = False
         file_mime_type = None
 
@@ -280,21 +288,26 @@ class OMERODataBroker:
 
             if import_original==True:
                 # use the function that follows if uploading images as original files (i.e. as imports)
-                conn = gateway.BlitzGateway(client_obj=self.CLIENT)
+                # conn = gateway.BlitzGateway(client_obj=self.CLIENT)
+                conn = self.get_connection()
 
                 '''
                 original_file = conn.createOriginalFileFromLocalFile(localPath = file_to_upload,
                                             origFilePathAndName = filename_w_ext,
                                             mimetype=file_mime_type, ns=None)
                 '''
-                cli = om_cli.CLI()
-                cli.loadplugins()
-                cli.set_client(self.CLIENT)
-
                 os.environ["JAVA_HOME"] = "/usr/local/openjdk-8"
                 os.environ["PATH"] = "$PATH:$JAVA_HOME/bin"
 
-                om_java.popen = popen
+                om_java.os.environ = os.environ.copy()
+
+                cli = om_cli.CLI()
+                cli.loadplugins()
+                cli.set_client(conn.c)
+
+                print om_java.os.environ
+
+                #
                 om_java.check_java(["/usr/local/openjdk-8/bin/java"])
                 print "found java"
                 #command = java.cmd(args, java, xargs, chdir, debug, debug_string)
@@ -302,16 +315,28 @@ class OMERODataBroker:
                 if dataset:
                     target = "Dataset:id:" + str(dataset.id.getValue())
                     cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
-                                '-T', target, '--description', "an image",
+                                '-T', target, '--description', "an image", "--quiet",
                                 '--no-upgrade-check', file_to_upload])
                 else:
                     cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
-                                '--description', "an image", '--no-upgrade-check', file_to_upload])
+                                '--description', "an image", '--no-upgrade-check', "--quiet", file_to_upload])
+
+                cli.onecmd(["logout"])
+
+                conn.c.closeSession()
+                conn.close()
+                cli.close()
+                cli.conn().close()
+                cli.get_client().closeSession()
+                cli.get_client().close()
+                cli.exit()
             else:
                 planes = script_utils.getPlaneFromImage(imagePath=file_to_upload, rgbIndex=None)
 
                 # Use below function if uploading images in RawPixelsStore format (i.e. not the original file import)
                 script_utils.createNewImage(self.SESSION, [planes], filename, "An image", dataset)
+
+        return
 
     def upload_images(self, files_to_upload, dataset_id=None, hypercube=False):
         dataset = None
@@ -331,8 +356,6 @@ class OMERODataBroker:
             dataset = query_service.findByQuery(query, params)
 
             print dataset.getId().getValue()
-
-        pool = ThreadPool(processes=10)
 
         if hypercube == True:
             # assume each sub-folder in the path contains one hypercube
@@ -356,8 +379,10 @@ class OMERODataBroker:
             # initialise the upload_image function with the current dataset
             # since the pool.map function won't accept multiple arguments
             cur_upload_image = partial(self.upload_image, dataset=dataset)
-            pool.map(cur_upload_image, files_to_upload)
-
+            pool = ThreadPool(processes=10)
+            results = pool.map(cur_upload_image, files_to_upload)
+            pool.terminate()
+            pool.close()
 
     # object_type = 'Dataset', 'Image', 'Project'
     def add_tags(self, tag_values, object_type, object_id):
