@@ -15,6 +15,8 @@ from omero import rtypes
 from omero import ClientError
 from omero import sys
 from omero import constants
+from omero import gateway
+from omero import cli as om_cli
 import omero.util.script_utils as script_utils
 from PIL import Image
 import numpy as np
@@ -22,7 +24,9 @@ from threading import Thread, BoundedSemaphore
 from multiprocessing.pool import ThreadPool
 from functools import partial
 from image_processor import ImageProcessor
-from default_image_processor import DefaultImageProcessor
+from omero_data_transfer.default_image_processor import DefaultImageProcessor
+from omero import java as om_java
+import subprocess
 
 class OMERODataType(Enum):
     project = 1
@@ -36,14 +40,14 @@ class OMERODataType(Enum):
     def __str__(self):
         return self.name.capitalize()
 
-from omero import java as om_java
-import subprocess
 
+JAVA_BIN_PATH = "/usr/local/openjdk-8/bin/java"
+JAVA_CLASS_PATH = "-classpath /home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/server/*"
+
+# Need to override the default OMERO java.py function since it cannot find the java binary
 def popen(args,
-          java="/usr/local/openjdk-8/bin/java",
-          #java="java",
-          # xargs=None,
-          xargs="-classpath /home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/server/*",
+          java=JAVA_BIN_PATH,
+          xargs=JAVA_CLASS_PATH,
           chdir=None,
           debug=None,
           debug_string=om_java.DEFAULT_DEBUG,
@@ -55,9 +59,8 @@ def popen(args,
     run(use_exec=False) but the Popen is returned rather than the stdout.
     """
     from omero import java as om_java
-    print args
     command = om_java.cmd(args, java, xargs, chdir, debug, debug_string)
-    print args
+
     om_java.check_java(command)
     if not chdir:
         chdir = os.getcwd()
@@ -244,10 +247,7 @@ class OMERODataBroker:
 
         return table
 
-    import subprocess
-    from omero import java as om_java
-
-    def upload_image(self, file_to_upload, dataset):
+    def upload_image(self, file_to_upload, dataset, import_original=True):
         valid_image = False
         file_mime_type = None
 
@@ -278,85 +278,40 @@ class OMERODataBroker:
             filename, file_extension = os.path.splitext(filename_w_ext)
             print filename_w_ext
 
-            planes = script_utils.getPlaneFromImage(imagePath = file_to_upload, rgbIndex=None)
-            print planes
-            #script_utils.createNewImage(self.SESSION, [planes], filename,
-            #                            "An image", dataset)
+            if import_original==True:
+                # use the function that follows if uploading images as original files (i.e. as imports)
+                conn = gateway.BlitzGateway(client_obj=self.CLIENT)
 
-            query_service = self.SESSION.getQueryService()
-            update_service = self.SESSION.getUpdateService()
-            raw_file_store = self.SESSION.createRawFileStore()
+                '''
+                original_file = conn.createOriginalFileFromLocalFile(localPath = file_to_upload,
+                                            origFilePathAndName = filename_w_ext,
+                                            mimetype=file_mime_type, ns=None)
+                '''
+                cli = om_cli.CLI()
+                cli.loadplugins()
+                cli.set_client(self.CLIENT)
 
-            tempFile = model.OriginalFileI()
-            tempFile.setName(rtypes.rstring(filename))
-            tempFile.setPath(rtypes.rstring(filename))
-            tempFile.setMimetype(rtypes.rstring(file_mime_type))
-            tempFile.setSize(rtypes.rlong(len(np.array(im))))
-            tempFile.setHash(rtypes.rstring(script_utils.calcSha1FromData(np.array(im))))
-            original_file = update_service.saveAndReturnObject(tempFile)
-            #print original_file
+                os.environ["JAVA_HOME"] = "/usr/local/openjdk-8"
+                os.environ["PATH"] = "$PATH:$JAVA_HOME/bin"
 
-            #link = model.JobOriginalFileLinkI()
-            #link.parent = model.DatasetI(dataset.id, False)
-
-            #link.child = model.OriginalFileI(original_file.id, False)
-            #link = update_service.saveAndReturnObject(link)
-            #print link
-            from omero import gateway
-            conn = gateway.BlitzGateway(client_obj=self.CLIENT)
-
-            original_file = conn.createOriginalFileFromLocalFile(localPath = file_to_upload,
-                                        origFilePathAndName = filename_w_ext,
-                                        mimetype=file_mime_type, ns=None)
-            # print original_file._obj
-            '''
-            path, name = os.path.split(file_to_upload)
-            fileSize = os.path.getsize(file_to_upload)
-            with open(file_to_upload, 'rb') as fileHandle:
-                return self.createOriginalFileFromFileObj(fileHandle, path, name,
-                                                          fileSize, file_mime_type)
-            '''
-            #OriginalFileWrapper
-            # link = model.DatasetOriginalFileLinkI()
-
-            from omero import cli
-            cli = cli.CLI()
-            cli.loadplugins()
-            cli.set_client(self.CLIENT)
-
-            os.environ["JAVA_HOME"] = "/usr/local/openjdk-8"
-            os.environ["PATH"] = "$PATH:$JAVA_HOME/bin"
-
-            from omero import java
-            java.popen = popen
-            java.check_java(["/usr/local/openjdk-8/bin/java"])
-            print "found java"
-            #command = java.cmd(args, java, xargs, chdir, debug, debug_string)
-            # check_java(command)
-            if dataset:
-                target = "Dataset:id:" + str(dataset.id.getValue())
-                cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
-                            '-T', target, '--description', "an image",
-                            '--no-upgrade-check', file_to_upload])
+                om_java.popen = popen
+                om_java.check_java(["/usr/local/openjdk-8/bin/java"])
+                print "found java"
+                #command = java.cmd(args, java, xargs, chdir, debug, debug_string)
+                # check_java(command)
+                if dataset:
+                    target = "Dataset:id:" + str(dataset.id.getValue())
+                    cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
+                                '-T', target, '--description', "an image",
+                                '--no-upgrade-check', file_to_upload])
+                else:
+                    cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
+                                '--description', "an image", '--no-upgrade-check', file_to_upload])
             else:
-                cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
-                            '--description', "an image", '--no-upgrade-check', file_to_upload])
+                planes = script_utils.getPlaneFromImage(imagePath=file_to_upload, rgbIndex=None)
 
-            '''
-            link = model.DatasetImageLinkI()
-            link.parent = model.DatasetI(dataset.id, False)
-            print rtypes.rlong(original_file._obj.id)
-            remote_image = conn.getObject("Image", original_file._obj.id)
-            print remote_image
-            #link.child = model.OriginalFileI(rtypes.rlong(original_file._obj.id), False)
-            link.child = model.ImageI(original_file._obj.id, False)
-            link = update_service.saveAndReturnObject(link)
-            '''
-            #original_file = script_utils.uploadAndAttachFile(queryService=query_service, updateService=update_service,
-            #                                 rawFileStore=raw_file_store, parent=dataset,
-            #                                 localName=file_to_upload, mimetype=file_mime_type, description="An image",
-            #                                 namespace=None, origFilePathName=None)
-            #print original_file
+                # Use below function if uploading images in RawPixelsStore format (i.e. not the original file import)
+                script_utils.createNewImage(self.SESSION, [planes], filename, "An image", dataset)
 
     def upload_images(self, files_to_upload, dataset_id=None, hypercube=False):
         dataset = None
