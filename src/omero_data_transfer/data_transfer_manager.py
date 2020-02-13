@@ -7,7 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 print sys.path
 
 import os
@@ -97,7 +97,7 @@ class DataTransferManager:
     essentially the same thing 
     (https://docs.openmicroscopy.org/omero/5.4.10/users/cli/import.html).
     '''
-    def upload_data_dir(self, data_broker, dir_path, import_images=True):
+    def upload_data_dir(self, data_broker, dir_path, hypercube=False):
         exp_file, log_metadata = None, None
 
         # retrieve the metadata from the log file
@@ -136,9 +136,16 @@ class DataTransferManager:
             print dataset_id
             self.upload_metadata(dataset_id, data_broker, dir_path, metadata)
 
+            data_broker.open_omero_session()
+
+            data_broker.upload_images(files_to_upload, dataset_id, hypercube)
+
+            data_broker.close_omero_session()
+            '''
             # if the image data files are to be imported as is in their existing format,
             # use the Java jar client with CLI arguments
-            if import_images == True:
+            if hypercube == False:
+
                 args = self.generate_cli_args(files_to_upload, dirs_to_upload, dataset_id)
                 print args
 
@@ -152,6 +159,7 @@ class DataTransferManager:
                 data_broker.upload_images(files_to_upload, dataset_id, hypercube=True)
 
                 data_broker.close_omero_session()
+            '''
 
         except Exception as error:
             print(error)
@@ -173,7 +181,7 @@ def main():
     dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
     data_transfer_manager = DataTransferManager()
-    data_transfer_manager.upload_data_dir(broker, dir_path, import_images=False)
+    data_transfer_manager.upload_data_dir(broker, dir_path, hypercube=False)
     # upload_metadata(broker, dir_path)
     print "hello2"
     broker.close_omero_session()

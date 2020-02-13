@@ -121,6 +121,6 @@ if data_path is not None and dataset_name is not None:
     # dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
     data_transfer_manager = DataTransferManager(parser_class=parser_class)
-    data_transfer_manager.upload_data_dir(broker, data_path, import_images=False)
+    data_transfer_manager.upload_data_dir(broker, data_path, hypercube=hypercube)
     # upload_metadata(broker, dir_path)
     broker.close_omero_session()
