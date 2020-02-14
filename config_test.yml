@@ -1,12 +1,8 @@
-prod_settings:
-  omero_conn:
-    server: localhost
-    port: 4064
-    username: root
-    password: mysecretpassword
-test_settings:
-  omero_conn:
-    server: demo.openmicroscopy.org
-    port: 4064
-    username: jhay
-    password: cooCheegh4qu
+omero_conn:
+  server: localhost
+  port: 4064
+  username: root
+  password: mysecretpassword
+java_bin_path: /usr/local/openjdk-8/bin/java
+java_class_path: /home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/server/*
+ice_config: /home/jovyan/work/pyOmeroUpload/ice.config
