@@ -269,7 +269,7 @@ class OMERODataBroker:
 
         return table
 
-    def upload_image(self, file_to_upload, dataset, import_original=False):
+    def upload_image(self, file_to_upload, dataset, import_original=True, cli=None):
         valid_image = False
         file_mime_type = None
 
@@ -300,20 +300,10 @@ class OMERODataBroker:
             filename, file_extension = os.path.splitext(filename_w_ext)
             print filename_w_ext
 
-            if import_original==True:
+            if import_original==True and cli is not None:
                 # use the function that follows if uploading images as original files (i.e. as imports)
                 # conn = gateway.BlitzGateway(client_obj=self.CLIENT)
-                conn = self.get_connection()
-
-                if self.ICE_CONFIG is not None:
-                    os.environ["ICE_CONFIG"] = self.ICE_CONFIG
-
-                om_java.os.environ = os.environ.copy()
-
-                cli = om_cli.CLI()
-                cli.loadplugins()
-                cli.set_client(conn.c)
-
+                # conn = self.get_connection()
                 if dataset:
                     target = "Dataset:id:" + str(dataset.id.getValue())
                     cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
@@ -322,16 +312,6 @@ class OMERODataBroker:
                 else:
                     cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
                                 '--description', "an image", '--no-upgrade-check', "--quiet", file_to_upload])
-
-                cli.onecmd(["logout"])
-
-                conn.c.closeSession()
-                conn.close()
-                cli.get_client().closeSession()
-                cli.get_client().close()
-                cli.conn().close()
-                cli.close()
-                cli.exit()
             else:
                 planes = script_utils.getPlaneFromImage(imagePath=file_to_upload, rgbIndex=None)
 
@@ -340,7 +320,7 @@ class OMERODataBroker:
 
         return
 
-    def upload_images(self, files_to_upload, dataset_id=None, hypercube=True):
+    def upload_images(self, files_to_upload, dataset_id=None, hypercube=True, import_original=False):
         dataset = None
         query_service = self.SESSION.getQueryService()
 
@@ -362,13 +342,42 @@ class OMERODataBroker:
         if hypercube == True:
             self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)
         else:
-            # initialise the upload_image function with the current dataset
-            # since the pool.map function won't accept multiple arguments
-            cur_upload_image = partial(self.upload_image, dataset=dataset)
-            pool = ThreadPool(processes=10)
-            results = pool.map(cur_upload_image, files_to_upload)
-            pool.terminate()
-            pool.close()
+            if import_original == True:
+                # initialise the upload_image function with the current dataset
+                # since the pool.map function won't accept multiple arguments
+                conn = self.get_connection()
+                if self.ICE_CONFIG is not None:
+                    os.environ["ICE_CONFIG"] = self.ICE_CONFIG
+
+                om_java.os.environ = os.environ.copy()
+
+                cli = om_cli.CLI()
+                cli.loadplugins()
+                cli.set_client(conn.c)
+
+                cur_upload_image = partial(self.upload_image, dataset=dataset, import_original=True, cli=cli)
+                pool = ThreadPool(processes=10)
+
+                results = pool.map(cur_upload_image, files_to_upload)
+                pool.terminate()
+                pool.close()
+
+                cli.onecmd(["logout"])
+
+                conn.c.closeSession()
+                conn.close()
+                cli.get_client().closeSession()
+                cli.get_client().close()
+                cli.conn().close()
+                cli.close()
+                cli.exit()
+            else:
+                cur_upload_image = partial(self.upload_image, dataset=dataset, import_original=False)
+                pool = ThreadPool(processes=10)
+
+                results = pool.map(cur_upload_image, files_to_upload)
+                pool.terminate()
+                pool.close()
 
     # object_type = 'Dataset', 'Image', 'Project'
     def add_tags(self, tag_values, object_type, object_id):
