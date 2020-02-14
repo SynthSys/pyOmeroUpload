@@ -5,7 +5,7 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-from image_processor import ImageProcessor
+from omero_data_transfer.image_processor import ImageProcessor
 import glob
 import abc
 import os
