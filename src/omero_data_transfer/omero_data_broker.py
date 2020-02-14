@@ -129,17 +129,12 @@ class OMERODataBroker:
         self.CLIENT.destroySession(self.CLIENT.getSessionId())
 
     def get_connection(self):
-        extra_config = dict()
-        # extra_config["omero.debug"] = "0"
-        # extra_config = [("omero.debug", "0")]
-        #extra_config["Ice.Config"] = "/dev/null"
-        # extra_config["omero.dump"] = "1"
-        # extra_config["omero.client.viewer.roi_limit"] = "100"
-        # extra_config = "../../tests/ice.config"
-        #conn = BlitzGateway(self.USERNAME, self.PASSWORD, host=self.HOST,
-        #                    port=self.PORT, extra_config=extra_config)
+        ice_config="/dev/null"
+        if self.ICE_CONFIG is not None:
+            ice_config = self.ICE_CONFIG
+
         c = om_client(host=self.HOST, port=self.PORT,
-                         args=["--Ice.Config=/dev/null", "--omero.debug=1"])
+                         args=["=".join("--Ice.Config", ice_config), "--omero.debug=1"])
         c.createSession(self.USERNAME, self.PASSWORD)
         conn = BlitzGateway(client_obj=c)
 
@@ -207,22 +202,12 @@ class OMERODataBroker:
         resources = self.SESSION.sharedResources()
         # resources = conn.c.sf.sharedResources()
 
-        print resources.areTablesEnabled()
-
         repository_id = resources.repositories().descriptions[0].getId().getValue()
-        print repository_id
-        #for des in resources.repositories().descriptions:
-            #print des
-            #print des._id
 
         # create columns and data types, and populate with data
         data_types = dataframe.dtypes
         table_data = []
         init_cols = []
-
-        # for  index, col in enumerate(columns):
-            #col_type = data_types.loc[index]
-            # col_data = dataframe
 
         for index, col in enumerate(dataframe.columns):
             print index, col, dataframe[col].dtype
@@ -235,20 +220,10 @@ class OMERODataBroker:
                 data_col = grid.StringColumn(col, '', max_len, list(dataframe.iloc[:, index].values))
                 table_data.append(data_col)
 
-        # print table_data
-
         table = resources.newTable(repository_id, ''.join(["/", table_name, ".h5"]))
         # table = resources.newTable(dataset_id, table_name)
         table.initialize(init_cols)
         table.addData(table_data)
-
-        '''ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        strings = ["one", "two", "three", "four", "five",
-                   "six", "seven", "eight", "nine", "ten"]
-        data1 = grid.LongColumn('Uid', 'test Long', ids)
-        data2 = grid.StringColumn('MyStringColumn', '', 64, strings)
-        data = [data1, data2]
-        table.addData(data)'''
 
         # note that this worked after the table.close() statement was invoked in 5.4.10
         orig_file = table.getOriginalFile()
@@ -328,9 +303,6 @@ class OMERODataBroker:
             params = dict()
             params["Data_Type"] = "Dataset"
             params["IDs"] = str(dataset_id)
-            # conn = BlitzGateway(client_obj=self.CLIENT)
-            # dataset = script_utils.get_objects(conn, params)
-            # query = "select p from Project p left outer join fetch p.datasetLinks as links left outer join fetch links.child as dataset where p.id =:pid"
             query = 'select d from Dataset d where d.id = :did'
 
             params = sys.Parameters()
@@ -379,9 +351,7 @@ class OMERODataBroker:
                 pool.terminate()
                 pool.close()
 
-    # object_type = 'Dataset', 'Image', 'Project'
     def add_tags(self, tag_values, object_type, object_id):
-        # self.SESSION.
         update_service = self.SESSION.getUpdateService()
 
         for tag_value in tag_values:
