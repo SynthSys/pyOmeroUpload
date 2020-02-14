@@ -16,7 +16,7 @@ OmeroCache = namedtuple('OmeroCache', 'Datasets Tags Projects')
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
 CONFIG = {}
 
 DATE_FORMAT_1 = "%d-%b-%Y"
@@ -244,11 +244,8 @@ class OmeroCacheManager():
 
 
 def main():
-    conn_settings = CONFIG['prod_settings']['omero_conn']
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'],
-                             port=conn_settings['port'])
+    conn_settings = CONFIG['omero_conn']
+    broker = OMERODataBroker(conn_settings)
 
     cache_manager = OmeroCacheManager()
     # broker.open_omero_session()

@@ -20,13 +20,7 @@ from omero_metadata_parser.metadata_parser import MetadataParser
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
-# alter below CLIENT_TYPE var to switch between executable jars
-#CLIENT_TYPE = "importer"
-CLIENT_TYPE = "cli"
-
-CLIENT_JAR_NAME = ".".join(["-".join(["omero", CLIENT_TYPE]), "jar"])
-CLIENT_JAR_PATH = os.path.join(PROJECT_DIR, 'resources', CLIENT_JAR_NAME)
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
 CONFIG = {}
 
 with open(CONFIG_FILE, 'r') as cfg:
@@ -43,31 +37,23 @@ class DataTransferManager:
         conn_settings = CONFIG['test_settings']['omero_conn']
         args = list()
 
-        if CLIENT_TYPE == 'importer':
-            files_arg = ",".join([str(x) for x in files_to_upload])
-            dirs_arg = ",".join([str(x) for x in dirs_to_upload])
+        '''
+            Invoke the official OMERO CommandLineImporter Java application. This
+            program takes one file or folder at a time; in the case of folders, they are
+            recusively scanned for all images in sub-directories and included in the
+            upload
+        '''
+        # -s localhost -u user -w password -d Dataset:50 foo.tiff
+        data_arg = None
 
-            args = ['-h', conn_settings['server'], '-p', str(conn_settings['port']),
-                    '-u', conn_settings['username'], '-w', conn_settings['password'],
-                    '-f', files_arg, '-d', dirs_arg, '-s', dataset]
-        else:
-            '''
-                Invoke the official OMERO CommandLineImporter Java application. This
-                program takes one file or folder at a time; in the case of folders, they are
-                recusively scanned for all images in sub-directories and included in the
-                upload
-            '''
-            # -s localhost -u user -w password -d Dataset:50 foo.tiff
-            data_arg = None
+        if dirs_to_upload is not None:
+            data_arg = os.path.commonprefix(dirs_to_upload)
+        elif files_to_upload is not None:
+            data_arg = " ".join([str(x) for x in files_to_upload])
 
-            if dirs_to_upload is not None:
-                data_arg = os.path.commonprefix(dirs_to_upload)
-            elif files_to_upload is not None:
-                data_arg = " ".join([str(x) for x in files_to_upload])
-
-            args = ['-s', conn_settings['server'], '-p', str(conn_settings['port']),
-                    '-u', conn_settings['username'], '-w', conn_settings['password'],
-                    '-d', dataset, data_arg] #'--depth', '7', items_arg]
+        args = ['-s', conn_settings['server'], '-p', str(conn_settings['port']),
+                '-u', conn_settings['username'], '-w', conn_settings['password'],
+                '-d', dataset, data_arg] #'--depth', '7', items_arg]
 
         return args
 
@@ -168,11 +154,8 @@ class DataTransferManager:
 
 
 def main():
-    conn_settings = CONFIG['test_settings']['omero_conn']
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'],
-                             port=conn_settings['port'],
+    conn_settings = CONFIG['omero_conn']
+    broker = OMERODataBroker(CONFIG,
                              image_processor=image_processor_impl())
     print "hello"
     broker.open_omero_session()

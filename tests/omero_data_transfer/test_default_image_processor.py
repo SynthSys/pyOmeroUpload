@@ -7,7 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 print sys.path
 
 import pytest
@@ -20,7 +20,7 @@ from omero_data_transfer.default_image_processor import DefaultImageProcessor as
 
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
 CONFIG = {}
 
 with open(CONFIG_FILE, 'r') as cfg:
@@ -53,11 +53,8 @@ def test_find_channel_map():
 def test_get_pixels_type():
     image_processor = image_processor_impl()
 
-    conn_settings = CONFIG['test_settings']['omero_conn']
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'],
-                             port=conn_settings['port'],
+    conn_settings = CONFIG['omero_conn']
+    broker = OMERODataBroker(conn_settings,
                              image_processor=image_processor_impl())
     print "hello"
     broker.open_omero_session()

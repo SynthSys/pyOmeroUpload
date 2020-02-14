@@ -17,6 +17,7 @@ from omero import sys
 from omero import constants
 from omero import gateway
 from omero import cli as om_cli
+from omero import java as om_java
 import omero.util.script_utils as script_utils
 from PIL import Image
 import numpy as np
@@ -25,8 +26,8 @@ from multiprocessing.pool import ThreadPool
 from functools import partial
 from image_processor import ImageProcessor
 from omero_data_transfer.default_image_processor import DefaultImageProcessor
-from omero import java as om_java
 import subprocess
+
 
 class OMERODataType(Enum):
     project = 1
@@ -39,35 +40,6 @@ class OMERODataType(Enum):
 
     def __str__(self):
         return self.name.capitalize()
-
-
-JAVA_BIN_PATH = "/usr/local/openjdk-8/bin/java"
-JAVA_CLASS_PATH = "-classpath /home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/server/*"
-
-# Need to override the default OMERO java.py function since it cannot find the java binary
-def popen(args,
-          java=JAVA_BIN_PATH,
-          xargs=JAVA_CLASS_PATH,
-          chdir=None,
-          debug=None,
-          debug_string=om_java.DEFAULT_DEBUG,
-          stdout=subprocess.PIPE,
-          stderr=subprocess.PIPE):
-    """
-    Creates a subprocess.Popen object and returns it. Uses cmd() internally
-    to create the Java command to be executed. This is the same logic as
-    run(use_exec=False) but the Popen is returned rather than the stdout.
-    """
-    from omero import java as om_java
-    command = om_java.cmd(args, java, xargs, chdir, debug, debug_string)
-
-    om_java.check_java(command)
-    if not chdir:
-        chdir = os.getcwd()
-    return subprocess.Popen(command, stdout=stdout, stderr=stderr,
-                            cwd=chdir, env=os.environ)
-
-om_java.popen = popen
 
 
 class OMERODataBroker:
@@ -87,16 +59,58 @@ class OMERODataBroker:
                            'image/tiff', 'image/bmp', 'image/vnd.ms-photo', 'image/vnd.adobe.photoshop', 'image/x-icon',
                            'image/heic']
 
-    def __init__(self, username="", password="", host="",
-                 port=0, image_processor=DefaultImageProcessor()):
-        self.USERNAME = username
-        self.PASSWORD = password
-        self.HOST = host
-        self.PORT = port
+    def __init__(self, config, image_processor=DefaultImageProcessor()):
+        self.USERNAME = config['omero_conn']['username']
+        self.PASSWORD = config['omero_conn']['password']
+        self.HOST = config['omero_conn']['server']
+        self.PORT = config['omero_conn']['port']
+
+        self.ICE_CONFIG = None
+        try:
+            self.ICE_CONFIG = config['ice_config']
+        except:
+            print "No ice_config provided"
+
+        java_bin_path = "java"
+        try:
+            java_bin_path = config['java_bin_path']
+        except:
+            print "No java_bin_path provided"
+
+        java_class_path = None
+        try:
+            java_class_path = config['java_class_path']
+        except:
+            print "No java_class_path provided"
 
         self.CLIENT = om_client(self.HOST, self.PORT)
         self.SESSION = None
         self.IMAGE_PROCESSOR = image_processor
+
+        # Need to override the default OMERO java.py function since it cannot find the java binary
+        def popen(args,
+                  java=java_bin_path,
+                  xargs=java_class_path,
+                  chdir=None,
+                  debug=None,
+                  debug_string=om_java.DEFAULT_DEBUG,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE):
+            """
+            Creates a subprocess.Popen object and returns it. Uses cmd() internally
+            to create the Java command to be executed. This is the same logic as
+            run(use_exec=False) but the Popen is returned rather than the stdout.
+            """
+            from omero import java as om_java
+            command = om_java.cmd(args, java, xargs, chdir, debug, debug_string)
+
+            om_java.check_java(command)
+            if not chdir:
+                chdir = os.getcwd()
+            return subprocess.Popen(command, stdout=stdout, stderr=stderr,
+                                    cwd=chdir, env=os.environ)
+
+        om_java.popen = popen
 
     def open_omero_session(self):
         try:
@@ -291,13 +305,8 @@ class OMERODataBroker:
                 # conn = gateway.BlitzGateway(client_obj=self.CLIENT)
                 conn = self.get_connection()
 
-                '''
-                original_file = conn.createOriginalFileFromLocalFile(localPath = file_to_upload,
-                                            origFilePathAndName = filename_w_ext,
-                                            mimetype=file_mime_type, ns=None)
-                '''
-                os.environ["JAVA_HOME"] = "/usr/local/openjdk-8"
-                os.environ["PATH"] = "$PATH:$JAVA_HOME/bin"
+                if self.ICE_CONFIG is not None:
+                    os.environ["ICE_CONFIG"] = self.ICE_CONFIG
 
                 om_java.os.environ = os.environ.copy()
 
@@ -305,13 +314,6 @@ class OMERODataBroker:
                 cli.loadplugins()
                 cli.set_client(conn.c)
 
-                print om_java.os.environ
-
-                #
-                om_java.check_java(["/usr/local/openjdk-8/bin/java"])
-                print "found java"
-                #command = java.cmd(args, java, xargs, chdir, debug, debug_string)
-                # check_java(command)
                 if dataset:
                     target = "Dataset:id:" + str(dataset.id.getValue())
                     cli.onecmd(["import", "--clientdir", "/home/jovyan/work/OMERO.server-5.4.10-ice36-b105/lib/client",
@@ -325,10 +327,10 @@ class OMERODataBroker:
 
                 conn.c.closeSession()
                 conn.close()
-                cli.close()
-                cli.conn().close()
                 cli.get_client().closeSession()
                 cli.get_client().close()
+                cli.conn().close()
+                cli.close()
                 cli.exit()
             else:
                 planes = script_utils.getPlaneFromImage(imagePath=file_to_upload, rgbIndex=None)
@@ -338,7 +340,7 @@ class OMERODataBroker:
 
         return
 
-    def upload_images(self, files_to_upload, dataset_id=None, hypercube=False):
+    def upload_images(self, files_to_upload, dataset_id=None, hypercube=True):
         dataset = None
         query_service = self.SESSION.getQueryService()
 
@@ -358,22 +360,6 @@ class OMERODataBroker:
             print dataset.getId().getValue()
 
         if hypercube == True:
-            # assume each sub-folder in the path contains one hypercube
-            # should retrieve each position's folder
-            '''
-            common_path = os.path.commonprefix(files_to_upload)
-            print common_path
-
-            import glob
-            cube_dirs = glob.glob(''.join([common_path,'*']))
-
-            update_service = self.SESSION.getUpdateService()
-            pixels_service = self.SESSION.getPixelsService()
-
-            for path in cube_dirs:
-                self.upload_dir_as_images(query_service, update_service, pixels_service,
-                                     path, dataset, convert_to_uint16=True)
-            '''
             self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)
         else:
             # initialise the upload_image function with the current dataset
@@ -404,7 +390,6 @@ class OMERODataBroker:
                 new_tag_anno = model.TagAnnotationI()
 
                 # TODO: determine what description the tag annotation should have; e.g. date, strain
-
 
                 # Use 'client' namespace to allow editing in Insight & web
                 new_tag_anno.setTextValue(rtypes.rstring(split_tag_value))
@@ -470,17 +455,15 @@ def main():
     import yaml
     import os
     PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-    CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+    CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
     CONFIG = {}
 
     with open(CONFIG_FILE, 'r') as cfg:
         CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
 
-    conn_settings = CONFIG['test_settings']['omero_conn']
+    conn_settings = CONFIG['omero_conn']
 
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'], port=conn_settings['port'],
+    broker = OMERODataBroker(conn_settings,
                              image_processor=DefaultImageProcessor())
     broker.open_omero_session()
     broker.close_omero_session()

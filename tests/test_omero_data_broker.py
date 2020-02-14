@@ -22,16 +22,22 @@ class TestOmeroDataBroker:
 
     @pytest.fixture(scope="class")
     def omero_data_broker(self):
+        CONFIG = {}
+        CONFIG['username'] = 'test'
+        CONFIG['password'] = 'test'
+        CONFIG['server'] = 'localhost'
+        CONFIG['port'] =  4064
         '''Returns a default OMERO data broker for localhost'''
-        return OMERODataBroker(username="test",
-                               password="test", host="localhost",
-                               port=4064)
+        return OMERODataBroker(CONFIG)
 
     @pytest.fixture(scope="class")
     def omero_session(self, omero_data_broker):
-        broker = OMERODataBroker(username="test",
-                                 password="test", host="localhost",
-                                 port=4064)
+        CONFIG = {}
+        CONFIG['username'] = 'test'
+        CONFIG['password'] = 'test'
+        CONFIG['server'] = 'localhost'
+        CONFIG['port'] =  4064
+        broker = OMERODataBroker(CONFIG)
         print omero_data_broker.HOST
         omero_data_broker.open_omero_session()
         print("teardown smtp")

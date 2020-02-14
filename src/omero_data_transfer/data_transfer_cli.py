@@ -24,7 +24,7 @@ CLIENT_TYPE = "cli"
 
 CLIENT_JAR_NAME = ".".join(["-".join(["omero", CLIENT_TYPE]), "jar"])
 CLIENT_JAR_PATH = os.path.join(PROJECT_DIR, 'resources', CLIENT_JAR_NAME)
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
+CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
 CONFIG = {}
 
 # Instantiate the parser
