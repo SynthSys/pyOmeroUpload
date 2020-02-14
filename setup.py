@@ -48,7 +48,7 @@ setup(
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='PyOmeroUpload',  # Optional
+    description='PyOmeroUpload is a library for uploading data and metadata to OME OMERO servers',  # Optional
 
     # This is an optional longer description of your project that represents
     # the body of text which users will see when they visit PyPI.
@@ -120,8 +120,8 @@ setup(
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
     # package_dir={'omeroupload': 'src'},  # Optional
-    package_dir={'metadata_parser': 'src/pyOmeroUpload/metadata_parser',
-                 'omero_data_transfer': 'src/pyOmeroUpload/omero_data_transfer'},
+    package_dir={'omero_metadata_parser': 'src/omero_metadata_parser',
+                 'omero_data_transfer': 'src/omero_data_transfer'},
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -133,7 +133,7 @@ setup(
     #   py_modules=["my_module"],
     #
     # packages=find_packages(where='src/pyOmeroUpload/metadata_parser'),# + find_packages(where="src/pyOmeroUpload/metadata_parser"),  # Required
-    packages=find_packages(where='src/pyOmeroUpload') + find_packages(include=['metadata_parser','omero_data_transfer']),
+    packages=find_packages(where='src') + find_packages(include=['omero_metadata_parser','omero_data_transfer']),
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
