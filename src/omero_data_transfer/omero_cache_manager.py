@@ -25,14 +25,10 @@ PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", ".
 class OmeroCacheManager():
     # OmeroCode/@OmeroDatabase/createDbInfo.m
     def create_db_info(self, data_broker):
-        print 'here'
         data_broker.open_omero_session()
 
         projects = data_broker.retrieve_objects(OMERODataType.project, None,
                                                 None)
-
-        for project in projects:
-            print project
 
         data_broker.close_omero_session()
 
@@ -55,11 +51,9 @@ class OmeroCacheManager():
 
         dbData = sio.loadmat(os.path.join(dir_path, 'dbData.mat'))
 
-        print dbData
-
     # essentially this function is translated from `OmeroDatabase.createDbInfo`
     def create_db_info(self, data_broker):
-        print "balls"
+        pass
 
     # essentially this function is translated from `OmeroDatabase.saveDbData`
     def save_db_data(self, data_broker):
@@ -73,7 +67,6 @@ class OmeroCacheManager():
         db_data["data"] = db_data_list
 
         for p_idx, project in enumerate(projects):
-            print project
             # use container query to retrieve datasets/metadata
             ds_ids, ds_names, ds_descs = list(), list(), list()
 
@@ -164,11 +157,9 @@ class OmeroCacheManager():
 
         tag_types = list(tag_anno.getDescription().getValue() for tag_anno in
                          tag_annotations if tag_anno.getDescription() is not None)
-        print tag_types
 
         tag_strs = list(tag_anno.getTextValue().getValue() for tag_anno in
                         tag_annotations if tag_anno.getDescription() is not None)
-        print tag_strs
 
         date = None
         date_str = ""

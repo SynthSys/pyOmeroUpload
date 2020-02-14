@@ -94,10 +94,6 @@ raw_times_rx = '^\s*(-?\d+\.?\d*),\s*(-?\d+\.?\d*),\s*(-?\d+\.?\d*),\s*(-?\d+\.?
 active_section = ''
 section_line_num = 0
 
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-# Load the input file to a variable
-print PROJECT_DIR
 
 class AcqMetadataParser(MetadataParser):
     '''
@@ -153,7 +149,6 @@ class AcqMetadataParser(MetadataParser):
         # if search_res is not None:
         if len(search_res) > 0:
             search_res = re.split(row_rx, line)
-            print line
             df.loc[len(df)] = list(filter(None, search_res))
         else:
             header_rx = re.compile(raw_header_rx)
@@ -163,8 +158,6 @@ class AcqMetadataParser(MetadataParser):
             if len(search_res) > 0:
                 # it's the header row; nothing to do since dataframe is already init'ed
                 search_res = re.split(header_rx, line)
-
-        print df
 
         return table_name
 
@@ -264,7 +257,6 @@ class AcqMetadataParser(MetadataParser):
 
     def extract_metadata(self, filename):
         global section_line_num
-        print 'hello'
 
         section_rxs = map(re.compile, raw_section_rxs)
 
@@ -320,6 +312,8 @@ class AcqMetadataParser(MetadataParser):
 
 def main():
     global switch_params
+
+    PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
     print PROJECT_DIR
     input_path = os.path.join(PROJECT_DIR, '..', 
                               "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00",

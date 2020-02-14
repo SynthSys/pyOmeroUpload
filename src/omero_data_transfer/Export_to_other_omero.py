@@ -281,7 +281,6 @@ def copy_to_remote_omero(client, local_conn, script_params):
     # End of transferring images
 
     message += "uploaded image ids: " + str(tuple(uploaded_image_ids))
-    print message
     return message
 
 

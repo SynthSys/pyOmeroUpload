@@ -17,21 +17,17 @@ class MetadataAggregator(MetadataParser):
     def extract_metadata(self, filename):
         dir_path = filename
         input_path = glob.glob(os.path.join(dir_path,'*[Aa]cq.txt'))
-        print input_path
 
         # handle acquisition metadata file parsing
         # input_file = open(input_path[0])
         acq_parser = AcqMetadataParser()
         acq_metadata = acq_parser.extract_metadata(input_path[0])
-        print acq_metadata
 
         input_path = glob.glob(os.path.join(dir_path,'*[Ll]og.txt'))
-        print input_path
 
         # handle acquisition metadata file parsing
         log_parser = LogMetadataParser()
         log_metadata = log_parser.extract_metadata(input_path[0])
-        print log_metadata
 
         merged_metadata = self.merge_object_properties(log_metadata, acq_metadata)
 

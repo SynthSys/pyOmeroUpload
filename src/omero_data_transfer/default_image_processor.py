@@ -34,7 +34,6 @@ class DefaultImageProcessor(ImageProcessor):
 
     def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
         common_path = os.path.commonprefix(file_path)
-        print common_path
 
         cube_dirs = glob.glob(''.join([common_path,'pos???']))
 
@@ -175,7 +174,6 @@ class DefaultImageProcessor(ImageProcessor):
             update_service.saveObject(lc)
             i += 1
 
-        print "here"
         # put the image in dataset, if specified.
         if dataset:
             link = model.DatasetImageLinkI()

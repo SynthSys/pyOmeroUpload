@@ -7,8 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-print sys.path
+# sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 
 import os
 from omero_data_transfer.omero_data_broker import OMERODataBroker
@@ -125,7 +124,7 @@ def main():
     conn_settings = CONFIG['omero_conn']
     broker = OMERODataBroker(CONFIG,
                              image_processor=image_processor_impl())
-    print "hello"
+
     broker.open_omero_session()
 
     # dir_path = os.path.join("","/var","data_dir")
@@ -134,7 +133,7 @@ def main():
     data_transfer_manager = DataTransferManager()
     data_transfer_manager.upload_data_dir(broker, "test_dataset", dir_path, hypercube=False)
     # upload_metadata(broker, dir_path)
-    print "hello2"
+
     broker.close_omero_session()
 
 

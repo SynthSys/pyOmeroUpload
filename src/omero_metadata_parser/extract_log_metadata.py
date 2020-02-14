@@ -200,7 +200,6 @@ class LogMetadataParser(MetadataParser):
 
         f.close()
 
-        print metadata
         log_metadata = self.create_log_metadata_obj(metadata)
 
         return log_metadata

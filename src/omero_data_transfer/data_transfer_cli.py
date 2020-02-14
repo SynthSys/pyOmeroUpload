@@ -7,8 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-print sys.path
+# sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 
 import os
 import argparse
@@ -80,9 +79,7 @@ if config_file is not None and data_path is not None and dataset_name is not Non
         module_path = args.module_path
 
         # add the new module path to sys path
-        print module_path
         sys.path.append(module_path)
-        print sys.path
 
         from importlib import import_module
 

@@ -7,8 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-print sys.path
+#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 
 import pytest
 import os
@@ -56,7 +55,7 @@ def test_get_pixels_type():
     conn_settings = CONFIG['omero_conn']
     broker = OMERODataBroker(conn_settings,
                              image_processor=image_processor_impl())
-    print "hello"
+
     broker.open_omero_session()
 
     query_service = broker.SESSION.getQueryService()
@@ -65,7 +64,6 @@ def test_get_pixels_type():
     dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
     common_path = os.path.commonprefix(dir_path)
-    print common_path
 
     cube_dirs = glob.glob(''.join([common_path,'pos???']))
 

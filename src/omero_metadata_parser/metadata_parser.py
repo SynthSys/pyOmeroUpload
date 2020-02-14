@@ -34,12 +34,10 @@ class MetadataParser(object):
         cur_kvp_val = ''
 
         for idx, kvp_str in enumerate(metadata_kvps):
-            print kvp_str
 
             # check if there's a colon; if not, assume it's the value of the current key
             # if it contains a colon, it must be a KVP
             kvps = kvp_str.split(':')
-            print kvps
 
             if len(kvps) == 1:
                 if len(cur_kvp_val.strip()) == 0:
@@ -55,8 +53,6 @@ class MetadataParser(object):
                     cur_kvp_val = kvps[1+i]
 
                     kvp_list.append([cur_kvp_key, cls.get_str_array_val(cur_kvp_val)])
-
-        print kvp_list
 
         # if len(kvp_list) == 0:
         #     kvp_list = None

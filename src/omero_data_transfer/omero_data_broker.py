@@ -210,8 +210,6 @@ class OMERODataBroker:
         init_cols = []
 
         for index, col in enumerate(dataframe.columns):
-            print index, col, dataframe[col].dtype
-
             if dataframe[col].dtype == object:
                 max_len = dataframe[col].str.len().max()
                 init_col = grid.StringColumn(col, '', max_len, [])
@@ -230,7 +228,7 @@ class OMERODataBroker:
         table.close()  # when we are done, close.
 
         orig_file_id = orig_file.id.val
-        print orig_file_id
+
         # ...so you can attach this data to an object e.g. Dataset
         file_ann = model.FileAnnotationI()
         # use unloaded OriginalFileI
@@ -273,7 +271,6 @@ class OMERODataBroker:
 
             filename_w_ext = os.path.basename(file_to_upload)
             filename, file_extension = os.path.splitext(filename_w_ext)
-            print filename_w_ext
 
             if import_original==True and cli is not None:
                 # use the function that follows if uploading images as original files (i.e. as imports)
@@ -308,8 +305,6 @@ class OMERODataBroker:
             params = sys.Parameters()
             params.map = {"did": rtypes.rlong(dataset_id)}
             dataset = query_service.findByQuery(query, params)
-
-            print dataset.getId().getValue()
 
         if hypercube == True:
             self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)

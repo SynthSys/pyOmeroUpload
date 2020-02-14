@@ -237,7 +237,7 @@ class TemplateMetadataParser(MetadataParser):
         line_date = None
 
         cur_dict_key = dict_key
-        print dict_key
+
         cur_metadata_vals = metadata_vals
 
         if date_match:
@@ -298,7 +298,6 @@ class TemplateMetadataParser(MetadataParser):
                         cur_metadata_vals.append(part)
         else:
             if is_dict_section:
-                print cur_dict_key
                 metadata_dict[cur_dict_key].append(safe_text)
             else:
                 cur_metadata_vals.append(safe_text)
@@ -351,11 +350,7 @@ class TemplateMetadataParser(MetadataParser):
                 for value_dict in metadata_section.values():
                     match = value_dict["rx"].search(s_line)
 
-                    print value_dict
-
                     if match:
-
-                        print "MATCHCHHHHH!"
                         metadata_section = self.handle_metadata_section(metadata_section,
                                                                 cur_dict_section, value_dict,
                                                                 cur_metadata_attr, match)
@@ -365,7 +360,6 @@ class TemplateMetadataParser(MetadataParser):
                         is_dict_section = metadata_section.is_dict_section
                         cur_metadata_dict = metadata_section.cur_metadata_dict
                         cur_key_label_regex = metadata_section.cur_key_label_regex
-                        print cur_key_label_regex
 
                         # if we have a match, this line is not a generic KVP so we do not
                         # want to continue processing with string delimiter logic
@@ -385,7 +379,6 @@ class TemplateMetadataParser(MetadataParser):
             cur_metadata_attr = attribute_kvp.cur_metadata_vals
             metadata_obj = attribute_kvp.metadata_obj
 
-        print len(attribute_kvps)
         metadata_obj["attributes"] = attribute_kvps
         # print metadata_obj
 
@@ -408,7 +401,6 @@ class TemplateMetadataParser(MetadataParser):
         global metadata_obj
         # convert JSON object into a standard dictionary
         metadata_obj = ast.literal_eval(json.dumps(schema, default=lambda o: getattr(o, '__dict__', str(o))))["sections"]
-        print metadata_obj
 
         # print schema.time_point.label
         # print schema.time_point.regex
@@ -456,8 +448,6 @@ class TemplateMetadataParser(MetadataParser):
         is_log, is_acq = False, False
 
         global metadata_obj, tag_descriptions
-        print lc_filename.rfind('acq')
-        print lc_filename.rfind('.')
 
         if(lc_filename.rfind('log') == (lc_filename.rfind('.')-3)):
             is_log = True
@@ -537,12 +527,9 @@ def main():
     for exp_file in os.listdir(dir_path):
         if str.lower(exp_file).endswith("acq.txt"):  # the log file containing metadata
 
-            print dir_path, exp_file
             acq_metadata = metadata_parser.extract_metadata(os.path.join(dir_path, exp_file))
 
             break
-
-    print acq_metadata
 
     exp_file, log_metadata = None, None
 
@@ -550,7 +537,6 @@ def main():
     for exp_file in os.listdir(dir_path):
         if str.lower(exp_file).endswith("log.txt"):  # the log file containing metadata
 
-            print dir_path, exp_file
             # log_metadata = metadata_parser.extract_metadata(os.path.join(dir_path, exp_file))
 
             break
