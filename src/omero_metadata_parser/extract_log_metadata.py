@@ -57,8 +57,6 @@ So our metadata structure is:
       - Omero tags:
 """
 
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
 LOG_METADATA_CONFIG = {
     "start_tag": "Experiment details:",
     "attribute_tags": ["Aim:", "Strain:", "Comments:", "Brightfield:",
@@ -209,6 +207,7 @@ class LogMetadataParser(MetadataParser):
 
 
 def main():
+    PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
     print PROJECT_DIR
     '''
     filename = os.path.join(PROJECT_DIR, "tests", "test_data", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt")

@@ -12,19 +12,14 @@ import numpy as np
 import re
 from datetime import datetime as dt
 
+
 OmeroCache = namedtuple('OmeroCache', 'Datasets Tags Projects')
-
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
-CONFIG = {}
 
 DATE_FORMAT_1 = "%d-%b-%Y"
 DATE_FORMAT_2 = "%Y_%b_%d"
 DATE_TAG_FORMAT = "%Y-%m-%d"
 
-with open(CONFIG_FILE, 'r') as cfg:
-    CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
 
 class OmeroCacheManager():
@@ -244,6 +239,12 @@ class OmeroCacheManager():
 
 
 def main():
+    CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
+    CONFIG = {}
+
+    with open(CONFIG_FILE, 'r') as cfg:
+        CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+
     conn_settings = CONFIG['omero_conn']
     broker = OMERODataBroker(conn_settings)
 

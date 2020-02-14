@@ -6,20 +6,11 @@ __copyright__ = "BioRDM"
 __license__ = "mit"
 
 import os
-import re
-from collections import OrderedDict, namedtuple
 from omero_metadata_parser.metadata_parser import MetadataParser
 from omero_metadata_parser.extract_acq_metadata import AcqMetadataParser
 from omero_metadata_parser.extract_log_metadata import LogMetadataParser
 import glob
-import abc
 
-import pandas as pd
-
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-# Load the input file to a variable
-print PROJECT_DIR
 
 class MetadataAggregator(MetadataParser):
 

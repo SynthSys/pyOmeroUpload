@@ -18,13 +18,6 @@ from omero_data_transfer.default_image_processor import DefaultImageProcessor as
 from omero_metadata_parser.aggregate_metadata import MetadataAggregator as metadata_parser_impl
 from omero_metadata_parser.metadata_parser import MetadataParser
 
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
-CONFIG = {}
-
-with open(CONFIG_FILE, 'r') as cfg:
-    CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
 
 class DataTransferManager:
     metadata_parser = metadata_parser_impl()
@@ -121,6 +114,14 @@ class DataTransferManager:
 
 
 def main():
+    PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
+
+    CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
+    CONFIG = {}
+
+    with open(CONFIG_FILE, 'r') as cfg:
+        CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+
     conn_settings = CONFIG['omero_conn']
     broker = OMERODataBroker(CONFIG,
                              image_processor=image_processor_impl())
