@@ -83,21 +83,8 @@ class DataTransferManager:
     essentially the same thing 
     (https://docs.openmicroscopy.org/omero/5.4.10/users/cli/import.html).
     '''
-    def upload_data_dir(self, data_broker, dir_path, hypercube=False):
-        exp_file, log_metadata = None, None
-
-        # retrieve the metadata from the log file
-        for exp_file in os.listdir(dir_path):
-            if exp_file.endswith("log.txt"):  # the log file containing metadata
-                break
-
-        print dir_path, exp_file
-        #metadata_parser = metadata_parser_impl()
+    def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False):
         metadata = self.metadata_parser.extract_metadata(dir_path)
-        # create the dataset using metadata values
-        print dir(metadata)
-        dataset_name = metadata.aim
-        print dataset_name
 
         try:
             data_broker.open_omero_session()
@@ -119,7 +106,7 @@ class DataTransferManager:
                         files_to_upload.append(os.path.join(root, sub_dir, data_file))
 
             dataset_id = str(dataset_obj.getId().getValue())
-            print dataset_id
+
             self.upload_metadata(dataset_id, data_broker, dir_path, metadata)
 
             data_broker.open_omero_session()
@@ -127,26 +114,6 @@ class DataTransferManager:
             data_broker.upload_images(files_to_upload, dataset_id, hypercube)
 
             data_broker.close_omero_session()
-            '''
-            # if the image data files are to be imported as is in their existing format,
-            # use the Java jar client with CLI arguments
-            if hypercube == False:
-
-                args = self.generate_cli_args(files_to_upload, dirs_to_upload, dataset_id)
-                print args
-
-                command = ['java', '-jar', str(CLIENT_JAR_PATH)]
-                command.extend(args)
-
-                subprocess.call(command)
-            else:
-                data_broker.open_omero_session()
-
-                data_broker.upload_images(files_to_upload, dataset_id, hypercube=True)
-
-                data_broker.close_omero_session()
-            '''
-
         except Exception as error:
             print(error)
         finally:
@@ -164,7 +131,7 @@ def main():
     dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
     data_transfer_manager = DataTransferManager()
-    data_transfer_manager.upload_data_dir(broker, dir_path, hypercube=False)
+    data_transfer_manager.upload_data_dir(broker, "test_dataset", dir_path, hypercube=False)
     # upload_metadata(broker, dir_path)
     print "hello2"
     broker.close_omero_session()

@@ -113,6 +113,6 @@ if config_file is not None and data_path is not None and dataset_name is not Non
     broker.open_omero_session()
 
     data_transfer_manager = DataTransferManager(parser_class=parser_class)
-    data_transfer_manager.upload_data_dir(broker, data_path, hypercube=hypercube)
+    data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
     # upload_metadata(broker, dir_path)
     broker.close_omero_session()
