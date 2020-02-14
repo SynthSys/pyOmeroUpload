@@ -16,21 +16,14 @@ import yaml
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-# alter below CLIENT_TYPE var to switch between executable jars
-#CLIENT_TYPE = "importer"
-CLIENT_TYPE = "cli"
-
-CLIENT_JAR_NAME = ".".join(["-".join(["omero", CLIENT_TYPE]), "jar"])
-CLIENT_JAR_PATH = os.path.join(PROJECT_DIR, 'resources', CLIENT_JAR_NAME)
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
-CONFIG = {}
-
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
 
 # mandatory args
+parser.add_argument('-c', '--config-file', dest='config_file',
+    type=str, required=True, metavar='config-file',
+    help="specifies the system file path to the configuration file containing connection parameters")
+
 parser.add_argument('-d', '--data-path', dest='data_path',
     type=str, required=True, metavar='data-path',
     help="specifies the system file path to the data directory for uploading")
@@ -40,30 +33,35 @@ parser.add_argument('-n', '--dataset-name', dest='dataset_name',
     help="specifies the name of the destination dataset")
 
 # optional args
-parser.add_argument('-c', '--hypercube', dest='hypercube',
-    type=bool, required=False, metavar='hypercube',
+parser.add_argument('-y', '--hypercube', action='store_true',
+    dest='hypercube',required=False,
     help="commands the uploader to generate hypercube images")
 
 parser.add_argument('-m', '--module-path', dest='module_path',
     type=str, required=False, metavar='module-path',
     help="specifies the system file path to the directory containing custom classes")
 
-parser.add_argument('-p', '--custom-metadata-parser', dest='custom_metadata_parser',
-    type=bool, required=False, metavar='custom-metadata-parser',
+parser.add_argument('-p', '--custom-metadata-parser', action='store_true',
+    dest='custom_metadata_parser', required=False,
     help="commands the uploader to use a custom parser class located in the module path")
 
-parser.add_argument('-i', '--custom-image-processor', dest='custom_image_processor',
-    type=bool, required=False, metavar='custom-image-processor',
+parser.add_argument('-i', '--custom-image-processor', action='store_true',
+    dest='custom_image_processor', required=False,
     help="commands the uploader to use a custom image processor class located in the module path")
 
 args = parser.parse_args()
 data_path = args.data_path
 dataset_name = args.dataset_name
+config_file = args.config_file
 hypercube, custom_metadata_parser, custom_image_processor = False, False, False
 module_path = ''
 
-if data_path is not None and dataset_name is not None:
+if config_file is not None and data_path is not None and dataset_name is not None:
     # validate args
+    if config_file.strip() is "":
+        print "Configuration file is empty"
+        quit()
+
     if data_path.strip() is "":
         print "Data path is empty"
         quit()
@@ -106,19 +104,13 @@ if data_path is not None and dataset_name is not None:
     if image_processor_impl is None:
         from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
-    with open(CONFIG_FILE, 'r') as cfg:
-        CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+    with open(config_file, 'r') as cfg:
+        config = yaml.load(cfg, Loader=yaml.FullLoader)
 
-    conn_settings = CONFIG['test_settings']['omero_conn']
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'],
-                             port=conn_settings['port'],
+    # conn_settings = config['omero_conn']
+    broker = OMERODataBroker(config,
                              image_processor=image_processor_impl())
     broker.open_omero_session()
-
-    # dir_path = os.path.join("","/var","data_dir")
-    # dir_path = os.path.join(PROJECT_DIR,"..","Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00")
 
     data_transfer_manager = DataTransferManager(parser_class=parser_class)
     data_transfer_manager.upload_data_dir(broker, data_path, hypercube=hypercube)
