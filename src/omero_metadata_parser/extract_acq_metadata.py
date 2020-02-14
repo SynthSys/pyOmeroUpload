@@ -8,9 +8,7 @@ __license__ = "mit"
 import os
 import re
 from collections import OrderedDict, namedtuple
-#import metadata_parser
 from omero_metadata_parser.metadata_parser import MetadataParser
-import abc
 
 import pandas as pd
 

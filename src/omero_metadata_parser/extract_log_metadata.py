@@ -7,8 +7,7 @@ __license__ = "mit"
 
 import os
 from collections import namedtuple
-from metadata_parser import MetadataParser
-import abc
+from omero_metadata_parser.metadata_parser import MetadataParser
 
 """
 Metadata in a Swain Lab microscope OMERO record looks like:

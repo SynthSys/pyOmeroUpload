@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import omero
+from omero_data_transfer.omero_data_broker import OMERODataType, OMERODataBroker
 import os,sys,inspect
 
 # make src directory accessible to tests
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.join(os.path.dirname(currentdir), 'src')
 sys.path.insert(0,parentdir)
-
-from omero_data_transfer.omero_data_broker import OMERODataType, OMERODataBroker
 
 __author__ = "Johnny Hay"
 __copyright__ = "Johnny Hay"
