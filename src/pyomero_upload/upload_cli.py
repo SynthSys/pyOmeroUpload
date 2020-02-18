@@ -7,7 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 
 import os
 import argparse
@@ -17,14 +17,6 @@ from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 from pyomero_upload.pyomero_upload import PyOmeroUploader
 
-
-def whatisthis(s):
-    if isinstance(s, str):
-        print "ordinary string"
-    elif isinstance(s, unicode):
-        print "unicode string"
-    else:
-        print "not a string"
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -112,12 +104,11 @@ elif username is not None and server is not None:
         print "Dataset name is empty"
         quit()
 
-    PASSWORD = getpass.getpass('Password: '.encode('utf-8'))
-    whatisthis(PASSWORD)
-    PASSWORD = str(PASSWORD.encode('utf-8')).encode('utf-8')
-    whatisthis(PASSWORD)
-    PASSWORD = u''.join(PASSWORD)
-    whatisthis(PASSWORD)
+    PASSWORD = getpass.getpass('Password: '.encode('ascii'))
+    # PASSWORD = getpass.getpass('Password: ')
+    PASSWORD = str(PASSWORD.encode('ascii')).encode('ascii')
+    # PASSWORD = u''.join(PASSWORD)
+
     USERNAME = username
     HOST = server
     PORT = args.port
