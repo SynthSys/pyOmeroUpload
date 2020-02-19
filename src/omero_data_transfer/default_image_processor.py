@@ -35,13 +35,16 @@ class DefaultImageProcessor(ImageProcessor):
     def process_images(self, omero_session, file_path, dataset=None, convert_to_uint16=True):
         common_path = os.path.commonprefix(file_path)
 
-        cube_dirs = glob.glob(''.join([common_path,'pos???']))
+        common_path = re.sub(r'(.*)pos[0-9]+[^$]', '\\1', common_path)
+
+        cube_dirs = [f for f in os.listdir(common_path) if re.search(r'pos[0-9]+$', f)]
 
         query_service = omero_session.getQueryService()
         update_service = omero_session.getUpdateService()
         pixels_service = omero_session.getPixelsService()
 
         for path in cube_dirs:
+            path = os.path.join(common_path, path)
             if os.path.isdir(path) == True:
                 self.upload_dir_as_images(omero_session, query_service, update_service, pixels_service,
                                         path, dataset, convert_to_uint16)
