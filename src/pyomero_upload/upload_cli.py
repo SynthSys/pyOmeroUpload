@@ -7,7 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-#sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
 
 import os
 import argparse
@@ -55,7 +55,7 @@ parser.add_argument('-n', '--dataset-name', dest='dataset_name',
 
 # optional args
 parser.add_argument('-y', '--hypercube', action='store_true',
-    dest='hypercube',required=False,
+    dest='hypercube', required=False,
     help="commands the uploader to generate hypercube images")
 
 parser.add_argument('-m', '--module-path', dest='module_path',
@@ -136,7 +136,7 @@ if data_path is not None and dataset_name is not None:
         print "Dataset name is empty"
         quit()
     
-    if args.hypercube is not None and str(args.hypercube).strip() is not '':
+    if args.hypercube is not None:
         hypercube = args.hypercube
 
     parser_class, image_processor_impl = None, None
@@ -150,13 +150,13 @@ if data_path is not None and dataset_name is not None:
 
         from importlib import import_module
 
-        if args.custom_metadata_parser is not None and args.custom_metadata_parser == True:
+        if args.custom_metadata_parser is not None:
             # user must have a submodule called 'custom_metadata_parser' containing a class
             # 'CustomMetadataParser' that implements the MetadataParser ABC
             cls = getattr(import_module('custom_metadata_parser'), 'CustomMetadataParser')
             parser_class = cls
 
-        if args.custom_image_processor is not None and args.custom_image_processor == True:
+        if args.custom_image_processor is not None:
             # user must have a submodule called 'custom_image_processor' containing a class
             # 'CustomImageProcessor' that implements the ImageProcessor ABC 
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
