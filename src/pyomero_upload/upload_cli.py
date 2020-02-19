@@ -5,16 +5,10 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-# override installed pyOmeroUpload package
-import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload2/src')
-
 import os
 import argparse
 import getpass
 import yaml
-from omero_data_transfer.data_transfer_manager import DataTransferManager
-from omero_data_transfer.omero_data_broker import OMERODataBroker
 from pyomero_upload.pyomero_upload import PyOmeroUploader
 
 
@@ -161,14 +155,6 @@ if data_path is not None and dataset_name is not None:
             # 'CustomImageProcessor' that implements the ImageProcessor ABC 
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
             image_processor_impl = cls
-
-    # override `parser_class` for custom metadata extractor implementations
-    if parser_class is None:
-        from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
-
-    # override `image_processor_impl` for custom image processing implementations
-    if image_processor_impl is None:
-        from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
     # initialise the PyOmeroUploader
     uploader = PyOmeroUploader(username=USERNAME, password=PASSWORD, server=HOST, port=PORT)

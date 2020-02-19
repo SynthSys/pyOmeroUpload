@@ -22,6 +22,14 @@ class PyOmeroUploader:
     def launch_upload(self, dataset_name, data_path, hypercube=False,\
         parser_class=parser_class, image_processor_impl=image_processor_impl):
 
+        # override `parser_class` for custom metadata extractor implementations
+        if parser_class is None:
+            from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
+
+        # override `image_processor_impl` for custom image processing implementations
+        if image_processor_impl is None:
+            from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
+
         # conn_settings = config['omero_conn']
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
                                 image_processor=image_processor_impl())
