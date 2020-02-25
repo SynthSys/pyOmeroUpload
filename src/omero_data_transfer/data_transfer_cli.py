@@ -127,6 +127,19 @@ elif username is not None and server is not None and args.password == True:
     HOST = server
     PORT = args.port
 
+# validate args
+if USERNAME.strip() is "":
+    print "Username is empty"
+    quit()
+
+if HOST.strip() is "":
+    print "Target OMERO server is empty"
+    quit()
+
+if PASSWORD.strip() is "":
+    print "Password is empty"
+    quit()
+
 if data_path is not None and dataset_name is not None:
     # validate args
     if data_path.strip() is "":
