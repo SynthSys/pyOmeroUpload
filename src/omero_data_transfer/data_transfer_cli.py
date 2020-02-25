@@ -11,18 +11,58 @@ import sys
 
 import os
 import argparse
+import getpass
 import yaml
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 
+# initialise broker and manager with the given parameters and start the upload process 
+def launch_upload(dataset_name, data_path, username, password, server, port=4064, hypercube=False,\
+    parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor):
+
+    if parser_class is None:
+        from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
+
+    if image_processor_impl is None:
+        from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
+
+    # conn_settings = config['omero_conn']
+    broker = OMERODataBroker(username=username, password=password, server=server, port=port,
+                             image_processor=image_processor_impl())
+    broker.open_omero_session()
+
+    data_transfer_manager = DataTransferManager(parser_class=parser_class)
+    data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
+    # upload_metadata(broker, dir_path)
+    broker.close_omero_session()
+
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
 
-# mandatory args
+# one or the other mandatory config args
+# user must either provide a config file or set of connection params
 parser.add_argument('-c', '--config-file', dest='config_file',
-    type=str, required=True, metavar='config-file',
+    type=str, required=False, metavar='config-file',
     help="specifies the system file path to the configuration file containing connection parameters")
 
+# set of connection params
+parser.add_argument('-u', '--username', dest='username',
+    type=str, required=False, metavar='username',
+    help="specifies the username for connection to the remote OMERO server")
+
+parser.add_argument('-s', '--server', dest='server',
+    type=str, required=False, metavar='server',
+    help="specifies the server name of the remote OMERO server to connect")
+
+parser.add_argument('-o', '--port', dest='port', const=4064,
+    type=int, required=False, metavar='port',
+    help="specifies the port on the remote OMERO server to connect (default is 4064)")
+
+parser.add_argument('-a', '--password', dest='password',
+    action='store_true', metavar='password',
+    help="hidden password prompt for connection to the remote OMERO server")
+
+# mandatory args
 parser.add_argument('-d', '--data-path', dest='data_path',
     type=str, required=True, metavar='data-path',
     help="specifies the system file path to the data directory for uploading")
@@ -55,12 +95,40 @@ config_file = args.config_file
 hypercube, custom_metadata_parser, custom_image_processor = False, False, False
 module_path = ''
 
-if config_file is not None and data_path is not None and dataset_name is not None:
+username = args.username
+server = args.server
+USERNAME, PASSWORD, HOST, PORT = '', '', '', 0
+
+if config_file is not None:
     # validate args
     if config_file.strip() is "":
         print "Configuration file is empty"
         quit()
 
+    with open(config_file, 'r') as cfg:
+        config = yaml.load(cfg, Loader=yaml.FullLoader)
+
+    USERNAME = config['omero_conn']['username']
+    PASSWORD = config['omero_conn']['password']
+    HOST = config['omero_conn']['server']
+    PORT = config['omero_conn']['port']
+elif username is not None and server is not None and args.password == True:
+    # validate args
+    if username.strip() is "":
+        print "Username is empty"
+        quit()
+
+    if server.strip() is "":
+        print "Dataset name is empty"
+        quit()
+
+    PASSWORD = getpass.getpass()
+    USERNAME = username
+    HOST = server
+    PORT = args.port
+
+if data_path is not None and dataset_name is not None:
+    # validate args
     if data_path.strip() is "":
         print "Data path is empty"
         quit()
@@ -95,21 +163,6 @@ if config_file is not None and data_path is not None and dataset_name is not Non
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
             image_processor_impl = cls
 
-    if parser_class is None:
-        from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
-
-    if image_processor_impl is None:
-        from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
-
-    with open(config_file, 'r') as cfg:
-        config = yaml.load(cfg, Loader=yaml.FullLoader)
-
-    # conn_settings = config['omero_conn']
-    broker = OMERODataBroker(config,
-                             image_processor=image_processor_impl())
-    broker.open_omero_session()
-
-    data_transfer_manager = DataTransferManager(parser_class=parser_class)
-    data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
-    # upload_metadata(broker, dir_path)
-    broker.close_omero_session()
+    launch_upload(dataset_name=dataset_name, data_path=data_path, username=USERNAME,\
+        password=PASSWORD, server=HOST, port=PORT, hypercube=hypercube,\
+        parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor)

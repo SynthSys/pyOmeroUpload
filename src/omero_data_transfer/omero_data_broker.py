@@ -59,29 +59,16 @@ class OMERODataBroker:
                            'image/tiff', 'image/bmp', 'image/vnd.ms-photo', 'image/vnd.adobe.photoshop', 'image/x-icon',
                            'image/heic']
 
-    def __init__(self, config, image_processor=DefaultImageProcessor()):
-        self.USERNAME = config['omero_conn']['username']
-        self.PASSWORD = config['omero_conn']['password']
-        self.HOST = config['omero_conn']['server']
-        self.PORT = config['omero_conn']['port']
+    def __init__(self, username, password, server, port=4064,\
+        image_processor=DefaultImageProcessor(), ice_config=None,\
+        java_bin_path=None, java_class_path=None):
 
-        self.ICE_CONFIG = None
-        try:
-            self.ICE_CONFIG = config['ice_config']
-        except:
-            print "No ice_config provided"
+        self.USERNAME = username
+        self.PASSWORD = password
+        self.HOST = server
+        self.PORT = port
 
-        java_bin_path = "java"
-        try:
-            java_bin_path = config['java_bin_path']
-        except:
-            print "No java_bin_path provided"
-
-        java_class_path = None
-        try:
-            java_class_path = config['java_class_path']
-        except:
-            print "No java_class_path provided"
+        self.ICE_CONFIG = ice_config
 
         self.CLIENT = om_client(self.HOST, self.PORT)
         self.SESSION = None
