@@ -18,7 +18,7 @@ from omero_data_transfer.omero_data_broker import OMERODataBroker
 
 # initialise broker and manager with the given parameters and start the upload process 
 def launch_upload(dataset_name, data_path, username, password, server, port=4064, hypercube=False,\
-    parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor):
+    parser_class=None, image_processor_impl=None):
 
     if parser_class is None:
         from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
@@ -54,12 +54,12 @@ parser.add_argument('-s', '--server', dest='server',
     type=str, required=False, metavar='server',
     help="specifies the server name of the remote OMERO server to connect")
 
-parser.add_argument('-o', '--port', dest='port', const=4064,
-    type=int, required=False, metavar='port',
+parser.add_argument('-o', '--port', dest='port', nargs='?',
+    const=4064, type=int, required=False, metavar='port',
     help="specifies the port on the remote OMERO server to connect (default is 4064)")
 
 parser.add_argument('-a', '--password', dest='password',
-    action='store_true', metavar='password',
+    action='store_true',
     help="hidden password prompt for connection to the remote OMERO server")
 
 # mandatory args
@@ -112,7 +112,7 @@ if config_file is not None:
     PASSWORD = config['omero_conn']['password']
     HOST = config['omero_conn']['server']
     PORT = config['omero_conn']['port']
-elif username is not None and server is not None and args.password == True:
+elif username is not None and server is not None:
     # validate args
     if username.strip() is "":
         print "Username is empty"
@@ -122,7 +122,7 @@ elif username is not None and server is not None and args.password == True:
         print "Dataset name is empty"
         quit()
 
-    PASSWORD = getpass.getpass()
+    PASSWORD = str(getpass.getpass())
     USERNAME = username
     HOST = server
     PORT = args.port
