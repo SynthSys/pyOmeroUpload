@@ -163,6 +163,13 @@ if data_path is not None and dataset_name is not None:
             cls = getattr(import_module('custom_image_processor'), 'CustomImageProcessor')
             image_processor_impl = cls
 
+    # override these for custom implementations
+    if parser_class is None:
+        from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
+
+    if image_processor_impl is None:
+        from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
+
     launch_upload(dataset_name=dataset_name, data_path=data_path, username=USERNAME,\
         password=PASSWORD, server=HOST, port=PORT, hypercube=hypercube,\
-        parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor)
+        parser_class=parser_class, image_processor_impl=image_processor_impl)
