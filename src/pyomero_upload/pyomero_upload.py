@@ -23,7 +23,7 @@ class PyOmeroUploader:
         parser_class=parser_class, image_processor_impl=image_processor_impl):
 
         # conn_settings = config['omero_conn']
-        broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.HOST, port=self.PORT,
+        broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
                                 image_processor=image_processor_impl())
         broker.open_omero_session()
 

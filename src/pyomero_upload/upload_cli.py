@@ -7,7 +7,7 @@ __license__ = "mit"
 
 # override installed pyOmeroUpload package
 import sys
-# sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 
 import os
 import argparse
