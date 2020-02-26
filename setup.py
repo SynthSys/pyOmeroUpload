@@ -43,7 +43,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.0.0a',  # Required
+    version='1.1.0',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -121,7 +121,8 @@ setup(
     # `src/`, it is necessary to specify the `package_dir` argument.
     # package_dir={'omeroupload': 'src'},  # Optional
     package_dir={'omero_metadata_parser': 'src/omero_metadata_parser',
-                 'omero_data_transfer': 'src/omero_data_transfer'},
+                 'omero_data_transfer': 'src/omero_data_transfer',
+                 'pyomero_upload': 'src/pyomero_upload'},
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -133,7 +134,8 @@ setup(
     #   py_modules=["my_module"],
     #
     # packages=find_packages(where='src/pyOmeroUpload/metadata_parser'),# + find_packages(where="src/pyOmeroUpload/metadata_parser"),  # Required
-    packages=find_packages(where='src') + find_packages(include=['omero_metadata_parser','omero_data_transfer']),
+    packages=find_packages(where='src') + find_packages(include=['omero_metadata_parser','omero_data_transfer',\
+                                                                 'pyomero_upload']),
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
