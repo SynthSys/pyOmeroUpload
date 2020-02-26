@@ -15,26 +15,7 @@ import getpass
 import yaml
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
-
-# initialise broker and manager with the given parameters and start the upload process 
-def launch_upload(dataset_name, data_path, username, password, server, port=4064, hypercube=False,\
-    parser_class=None, image_processor_impl=None):
-
-    if parser_class is None:
-        from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
-
-    if image_processor_impl is None:
-        from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
-
-    # conn_settings = config['omero_conn']
-    broker = OMERODataBroker(username=username, password=password, server=server, port=port,
-                             image_processor=image_processor_impl())
-    broker.open_omero_session()
-
-    data_transfer_manager = DataTransferManager(parser_class=parser_class)
-    data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
-    # upload_metadata(broker, dir_path)
-    broker.close_omero_session()
+from pyomero_upload.pyomero_upload import PyOmeroUploader
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -184,7 +165,9 @@ if data_path is not None and dataset_name is not None:
     if image_processor_impl is None:
         from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
 
-    # initialise the uploader client and data transfer manager, then start upload process
-    launch_upload(dataset_name=dataset_name, data_path=data_path, username=USERNAME,\
-        password=PASSWORD, server=HOST, port=PORT, hypercube=hypercube,\
+    # initialise the PyOmeroUploader
+    uploader = PyOmeroUploader(username=USERNAME, password=PASSWORD, server=HOST, port=PORT)
+
+    # start upload process
+    uploader.launch_upload(dataset_name=dataset_name, data_path=data_path, hypercube=hypercube,\
         parser_class=parser_class, image_processor_impl=image_processor_impl)
