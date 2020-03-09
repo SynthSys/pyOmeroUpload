@@ -6,6 +6,7 @@ __copyright__ = "BioRDM"
 __license__ = "mit"
 
 import sys
+
 sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
 
 from omero_data_transfer.data_transfer_manager import DataTransferManager
@@ -37,13 +38,13 @@ class PyOmeroUploader:
         # conn_settings = config['omero_conn']
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
                                  image_processor=image_processor_impl())
-        #broker.open_omero_session()
+        # broker.open_omero_session()
 
         data_transfer_manager = DataTransferManager(parser_class=parser_class)
         results = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
 
         # upload_metadata(broker, dir_path)
-        #broker.close_omero_session()
+        # broker.close_omero_session()
 
         # Print results
         image_id_list = results['image_id_list']
@@ -61,3 +62,22 @@ class PyOmeroUploader:
         dataset_url = '/'.join(['http:/', self.SERVER, 'webclient', dataset_param])
         print ': '.join(['Uploaded Dataset URL', dataset_url])
 
+    def search_by_query(self, query, params):
+        broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
+                                 image_processor=DefaultImageProcessor())
+
+        broker.open_omero_session()
+        objects = broker.find_objects_by_query(query, params)
+        broker.close_omero_session()
+
+        return objects
+
+    def search_by_type_field(self, type, field, value, case_sensitive=False):
+        broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
+                                 image_processor=DefaultImageProcessor())
+
+        broker.open_omero_session()
+        objects = broker.find_objects_by_type_field_value(type, field, value, case_sensitive)
+        broker.close_omero_session()
+
+        return objects

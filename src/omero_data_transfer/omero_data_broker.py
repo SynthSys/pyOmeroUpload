@@ -184,7 +184,25 @@ class OMERODataBroker:
         queryService = self.SESSION.getQueryService()
         # query = "select p from Project p left outer join fetch p.datasetLinks as links left outer join fetch links.child as dataset where p.id =:pid"
 
-        objects = queryService.findByQuery(query, params)
+        objects = queryService.findAllByQuery(query, params)
+
+        return objects
+
+    """
+        Searches a given field matching against a String. Method
+        allows for case sensitive or insensitive searching using
+        the (I)LIKE comparators.
+        Arguments:
+        type -- type of entity to be searched. Not null.
+        field -- the name of the field, either as simple string or as public static final from the entity class, e.g. omero.model.Project#NAME. Not null.
+        value -- String used for search. Not null.
+        caseSensitive -- whether to use LIKE or ILIKE
+        Returns: A list (possibly empty) with the results.
+    """
+    def find_objects_by_type_field_value(self, type, field, value, case_sensitive=False):
+        queryService = self.SESSION.getQueryService()
+
+        objects = queryService.findAllByString(klass=type, field=field, value=value, caseSensitive=case_sensitive)
 
         return objects
 
