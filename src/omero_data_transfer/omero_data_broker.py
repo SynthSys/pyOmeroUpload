@@ -231,6 +231,7 @@ class OMERODataBroker:
     def upload_image(self, file_to_upload, dataset, import_original=True, cli=None):
         valid_image = False
         file_mime_type = None
+        image = None
 
         if file_to_upload.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff')):
             import filetype
@@ -239,8 +240,8 @@ class OMERODataBroker:
                 print('Cannot guess file type!')
                 valid_image = False
 
-            print('File extension: %s' % ftype.extension)
-            print('File MIME type: %s' % ftype.mime)
+            # print('File extension: %s' % ftype.extension)
+            # print('File MIME type: %s' % ftype.mime)
 
             if ftype.mime not in self.ACCEPTED_MIME_TYPES:
                 valid_image = False
@@ -274,9 +275,12 @@ class OMERODataBroker:
                 planes = script_utils.getPlaneFromImage(imagePath=file_to_upload, rgbIndex=None)
 
                 # Use below function if uploading images in RawPixelsStore format (i.e. not the original file import)
-                script_utils.createNewImage(self.SESSION, [planes], filename, "An image", dataset)
+                image = script_utils.createNewImage(self.SESSION, [planes], filename, "An image", dataset)
 
-        return
+        if image is not None:
+            return image.getId().getValue()
+        else:
+            return
 
     def upload_images(self, files_to_upload, dataset_id=None, hypercube=True, import_original=False):
         dataset = None
@@ -293,7 +297,7 @@ class OMERODataBroker:
             dataset = query_service.findByQuery(query, params)
 
         if hypercube == True:
-            self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)
+            image_ids = self.IMAGE_PROCESSOR.process_images(self.SESSION, files_to_upload, dataset)
         else:
             if import_original == True:
                 # initialise the upload_image function with the current dataset
@@ -331,6 +335,8 @@ class OMERODataBroker:
                 results = pool.map(cur_upload_image, files_to_upload)
                 pool.terminate()
                 pool.close()
+
+                print results
 
     def add_tags(self, tag_values, object_type, object_id):
         update_service = self.SESSION.getUpdateService()

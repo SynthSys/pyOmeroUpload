@@ -43,11 +43,18 @@ class DefaultImageProcessor(ImageProcessor):
         update_service = omero_session.getUpdateService()
         pixels_service = omero_session.getPixelsService()
 
+        hypercube_ids = []
+
         for path in cube_dirs:
             path = os.path.join(common_path, path)
             if os.path.isdir(path) == True:
-                self.upload_dir_as_images(omero_session, query_service, update_service, pixels_service,
+                image_id = self.upload_dir_as_images(omero_session, query_service, update_service, pixels_service,
                                         path, dataset, convert_to_uint16)
+
+                if image_id is not None:
+                    hypercube_ids.append(image_id)
+
+        return hypercube_ids
 
 
     # adapted from script_utils
@@ -91,8 +98,8 @@ class DefaultImageProcessor(ImageProcessor):
                     print('Cannot guess file type!')
                     continue
 
-                print('File extension: %s' % ftype.extension)
-                print('File MIME type: %s' % ftype.mime)
+                # print('File extension: %s' % ftype.extension)
+                # print('File MIME type: %s' % ftype.mime)
 
                 if ftype.mime not in ACCEPTED_MIME_TYPES:
                     continue
