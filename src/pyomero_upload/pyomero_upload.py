@@ -7,8 +7,9 @@ __license__ = "mit"
 
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
-from omero_metadata_parser.aggregate_metadata import MetadataAggregator as parser_class
-from omero_data_transfer.default_image_processor import DefaultImageProcessor as image_processor_impl
+from omero_metadata_parser.aggregate_metadata import MetadataAggregator
+from omero_data_transfer.default_image_processor import DefaultImageProcessor
+
 
 class PyOmeroUploader:
 
@@ -19,8 +20,8 @@ class PyOmeroUploader:
         self.PORT = port
 
     # initialise broker and manager with the given parameters and start the upload process 
-    def launch_upload(self, dataset_name, data_path, hypercube=False,\
-        parser_class=parser_class, image_processor_impl=image_processor_impl):
+    def launch_upload(self, dataset_name, data_path, hypercube=False,
+                      parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor):
 
         # override `parser_class` for custom metadata extractor implementations
         if parser_class is None:
@@ -32,7 +33,7 @@ class PyOmeroUploader:
 
         # conn_settings = config['omero_conn']
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
-                                image_processor=image_processor_impl())
+                                 image_processor=image_processor_impl())
         broker.open_omero_session()
 
         data_transfer_manager = DataTransferManager(parser_class=parser_class)
