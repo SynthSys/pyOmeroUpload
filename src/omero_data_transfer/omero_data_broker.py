@@ -7,7 +7,7 @@ __license__ = "mit"
 
 import os
 from enum import Enum
-from omero.gateway import BlitzGateway, TagAnnotationWrapper,\
+from omero.gateway import BlitzGateway, TagAnnotationWrapper, \
     MapAnnotationWrapper
 from omero import client as om_client
 from omero import model, grid
@@ -43,7 +43,6 @@ class OMERODataType(Enum):
 
 
 class OMERODataBroker:
-
     # see HQL query examples at
     # https://docs.openmicroscopy.org/omero/5.4.10/developers/GettingStarted.html
     # and model/table names at
@@ -52,16 +51,16 @@ class OMERODataBroker:
                                  "fetch p.annotationLinks as links left outer join fetch " \
                                  "links.child as annotation where p.id=:pid"
     LINKED_ANNOS_BY_DS_QUERY = "select d from Dataset d left outer join " \
-                                 "fetch d.annotationLinks as links left outer join fetch " \
-                                 "links.child as annotation where d.id=:did"
+                               "fetch d.annotationLinks as links left outer join fetch " \
+                               "links.child as annotation where d.id=:did"
 
     ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/jpx', 'image/png', 'image/gif', 'image/webp', 'image/x-canon-cr2',
                            'image/tiff', 'image/bmp', 'image/vnd.ms-photo', 'image/vnd.adobe.photoshop', 'image/x-icon',
                            'image/heic']
 
-    def __init__(self, username, password, server, port=4064,\
-        image_processor=DefaultImageProcessor(), ice_config=None,\
-        java_bin_path=None, java_class_path=None):
+    def __init__(self, username, password, server, port=4064,
+                 image_processor=DefaultImageProcessor(), ice_config=None,
+                 java_bin_path=None, java_class_path=None):
 
         self.USERNAME = username
         self.PASSWORD = password
@@ -116,12 +115,12 @@ class OMERODataBroker:
         self.CLIENT.destroySession(self.CLIENT.getSessionId())
 
     def get_connection(self):
-        ice_config="/dev/null"
+        ice_config = "/dev/null"
         if self.ICE_CONFIG is not None:
             ice_config = self.ICE_CONFIG
 
         c = om_client(host=self.HOST, port=self.PORT,
-                         args=["=".join("--Ice.Config", ice_config), "--omero.debug=1"])
+                      args=["=".join("--Ice.Config", ice_config), "--omero.debug=1"])
         c.createSession(self.USERNAME, self.PASSWORD)
         conn = BlitzGateway(client_obj=c)
 
@@ -158,12 +157,12 @@ class OMERODataBroker:
             params = sys.Parameters()
             params.map = {"pid": rtypes.rlong(object_id)}
             annos = self.find_objects_by_query(self.LINKED_ANNOS_BY_PROJ_QUERY,
-                                                 params)
+                                               params)
         elif data_type == OMERODataType.dataset:
             params = sys.Parameters()
             params.map = {"did": rtypes.rlong(object_id)}
             annos = self.find_objects_by_query(self.LINKED_ANNOS_BY_DS_QUERY,
-                                                  params)
+                                               params)
 
         return annos
 
@@ -259,7 +258,7 @@ class OMERODataBroker:
             filename_w_ext = os.path.basename(file_to_upload)
             filename, file_extension = os.path.splitext(filename_w_ext)
 
-            if import_original==True and cli is not None:
+            if import_original == True and cli is not None:
                 # use the function that follows if uploading images as original files (i.e. as imports)
                 # conn = gateway.BlitzGateway(client_obj=self.CLIENT)
                 # conn = self.get_connection()
