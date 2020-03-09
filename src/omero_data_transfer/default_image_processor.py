@@ -5,6 +5,9 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 from omero_data_transfer.image_processor import ImageProcessor
 import glob
 import abc
@@ -18,12 +21,15 @@ import logging
 import re
 from operator import itemgetter
 
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
-logging.debug('This message should go to the log file')
-logging.info('So should this')
-logging.warning('And this, too')
-
-SU_LOG = logging.getLogger("omero.util.script_utils")
+# logging config
+logging.basicConfig(filename='image_processing.log', level=logging.DEBUG)
+PROCESSING_LOG = logging.getLogger(__name__)
+# handlers
+f_handler = logging.FileHandler('image_processing.log')
+f_handler.setLevel(logging.DEBUG)
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+f_handler.setFormatter(f_format)
+PROCESSING_LOG.addHandler(f_handler)
 
 ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/jpx', 'image/png', 'image/gif', 'image/webp', 'image/x-canon-cr2',
                        'image/tiff', 'image/bmp', 'image/vnd.ms-photo', 'image/vnd.adobe.photoshop', 'image/x-icon',
@@ -95,11 +101,11 @@ class DefaultImageProcessor(ImageProcessor):
                 import filetype
                 ftype = filetype.guess(fullpath)
                 if ftype is None:
-                    print('Cannot guess file type!')
+                    PROCESSING_LOG.error('Cannot guess file type!')
                     continue
 
-                # print('File extension: %s' % ftype.extension)
-                # print('File MIME type: %s' % ftype.mime)
+                PROCESSING_LOG.debug('File extension: %s' % ftype.extension)
+                PROCESSING_LOG.debug('File MIME type: %s' % ftype.mime)
 
                 if ftype.mime not in ACCEPTED_MIME_TYPES:
                     continue
@@ -147,7 +153,7 @@ class DefaultImageProcessor(ImageProcessor):
         # imageName = os.path.commonprefix(tokens).strip('_00')
         imageName = pos
         description = "Imported from images in %s" % path
-        SU_LOG.info("Creating image: %s" % imageName)
+        PROCESSING_LOG.info("Creating image: %s" % imageName)
 
         # use the last image to get X, Y sizes and pixel type
         if rgb:
@@ -159,7 +165,7 @@ class DefaultImageProcessor(ImageProcessor):
 
         sizeY, sizeX = plane.shape
 
-        SU_LOG.debug("sizeX: %s  sizeY: %s sizeZ: %s  sizeC: %s  sizeT: %s"
+        PROCESSING_LOG.debug("sizeX: %s  sizeY: %s sizeZ: %s  sizeC: %s  sizeT: %s"
                      % (sizeX, sizeY, sizeZ, sizeC, sizeT))
 
         # code below here is very similar to combineImages.py
@@ -248,7 +254,7 @@ class DefaultImageProcessor(ImageProcessor):
             pixelsType = query_service.findByQuery(
                 "from PixelsType as p where p.value='%s'" % script_utils.PixelsTypefloat, None)
         if pixelsType is None:
-            SU_LOG.warn("Unknown pixels type for: %s" % pType)
+            PROCESSING_LOG.warn("Unknown pixels type for: %s" % pType)
             return
 
         if convert_to_uint16 == True:
@@ -287,18 +293,18 @@ class DefaultImageProcessor(ImageProcessor):
                         if (zIndex, c, tIndex) in imageMap:
                             imagePath = imageMap[(zIndex, c, tIndex)]
                             if rgb:
-                                SU_LOG.debug(
+                                PROCESSING_LOG.debug(
                                     "Getting rgb plane from: %s" % imagePath)
                                 plane2D = script_utils.getPlaneFromImage(imagePath, theC)
                             else:
-                                SU_LOG.debug("Getting plane from: %s" % imagePath)
+                                PROCESSING_LOG.debug("Getting plane from: %s" % imagePath)
                                 plane2D = script_utils.getPlaneFromImage(imagePath)
                         else:
-                            SU_LOG.debug(
+                            PROCESSING_LOG.debug(
                                 "Creating blank plane for .",
                                 theZ, channels[theC], theT)
                             plane2D = np.zeros((sizeY, sizeX))
-                        SU_LOG.debug(
+                        PROCESSING_LOG.debug(
                             "Uploading plane: theZ: %s, theC: %s, theT: %s"
                             % (theZ, theC, theT))
 

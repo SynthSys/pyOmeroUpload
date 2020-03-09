@@ -5,6 +5,9 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 import os
 from enum import Enum
 from omero.gateway import BlitzGateway, TagAnnotationWrapper, \
@@ -19,6 +22,7 @@ from omero import gateway
 from omero import cli as om_cli
 from omero import java as om_java
 import omero.util.script_utils as script_utils
+import logging
 from PIL import Image
 import numpy as np
 from threading import Thread, BoundedSemaphore
@@ -27,6 +31,16 @@ from functools import partial
 from image_processor import ImageProcessor
 from omero_data_transfer.default_image_processor import DefaultImageProcessor
 import subprocess
+
+# logging config
+logging.basicConfig(filename='omero_upload.log', level=logging.DEBUG)
+BROKER_LOG = logging.getLogger(__name__)
+# handlers
+f_handler = logging.FileHandler('omero_upload.log')
+f_handler.setLevel(logging.DEBUG)
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+f_handler.setFormatter(f_format)
+BROKER_LOG.addHandler(f_handler)
 
 
 class OMERODataType(Enum):
@@ -103,7 +117,7 @@ class OMERODataBroker:
             self.SESSION = self.CLIENT.getSession()
             return
         except ClientError:
-            print "No live session"
+            BROKER_LOG.info("No live session")
 
         self.SESSION = self.CLIENT.createSession(self.USERNAME, self.PASSWORD)
         return
@@ -237,11 +251,11 @@ class OMERODataBroker:
             import filetype
             ftype = filetype.guess(file_to_upload)
             if ftype is None:
-                print('Cannot guess file type!')
+                BROKER_LOG.error('Cannot guess file type!')
                 valid_image = False
 
-            # print('File extension: %s' % ftype.extension)
-            # print('File MIME type: %s' % ftype.mime)
+            BROKER_LOG.debug('File extension: %s' % ftype.extension)
+            BROKER_LOG.debug('File MIME type: %s' % ftype.mime)
 
             if ftype.mime not in self.ACCEPTED_MIME_TYPES:
                 valid_image = False
@@ -285,6 +299,7 @@ class OMERODataBroker:
     def upload_images(self, files_to_upload, dataset_id=None, hypercube=True, import_original=False):
         dataset = None
         query_service = self.SESSION.getQueryService()
+        image_ids = []
 
         if dataset_id != None:
             params = dict()
@@ -332,11 +347,11 @@ class OMERODataBroker:
                 cur_upload_image = partial(self.upload_image, dataset=dataset, import_original=False)
                 pool = ThreadPool(processes=10)
 
-                results = pool.map(cur_upload_image, files_to_upload)
+                image_ids = pool.map(cur_upload_image, files_to_upload)
                 pool.terminate()
                 pool.close()
 
-                print results
+        return image_ids
 
     def add_tags(self, tag_values, object_type, object_id):
         update_service = self.SESSION.getUpdateService()

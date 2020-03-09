@@ -5,12 +5,15 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 import os
 import argparse
 import getpass
 import yaml
 from pyomero_upload.pyomero_upload import PyOmeroUploader
-
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -18,51 +21,51 @@ parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Applic
 # one or the other mandatory config args
 # user must either provide a config file or set of connection params
 parser.add_argument('-c', '--config-file', dest='config_file',
-    type=str, required=False, metavar='config-file',
-    help="specifies the system file path to the configuration file containing connection parameters")
+                    type=str, required=False, metavar='config-file',
+                    help="specifies the system file path to the configuration file containing connection parameters")
 
 # set of connection params
 parser.add_argument('-u', '--username', dest='username',
-    type=str, required=False, metavar='username',
-    help="specifies the username for connection to the remote OMERO server")
+                    type=str, required=False, metavar='username',
+                    help="specifies the username for connection to the remote OMERO server")
 
 parser.add_argument('-s', '--server', dest='server',
-    type=str, required=False, metavar='server',
-    help="specifies the server name of the remote OMERO server to connect")
+                    type=str, required=False, metavar='server',
+                    help="specifies the server name of the remote OMERO server to connect")
 
 parser.add_argument('-o', '--port', dest='port', nargs='?',
-    const=4064, type=int, required=False, metavar='port',
-    help="specifies the port on the remote OMERO server to connect (default is 4064)")
+                    const=4064, type=int, required=False, metavar='port',
+                    help="specifies the port on the remote OMERO server to connect (default is 4064)")
 
 parser.add_argument('-a', '--password', dest='password',
-    action='store_true',
-    help="hidden password prompt for connection to the remote OMERO server")
+                    action='store_true',
+                    help="hidden password prompt for connection to the remote OMERO server")
 
 # mandatory args
 parser.add_argument('-d', '--data-path', dest='data_path',
-    type=str, required=True, metavar='data-path',
-    help="specifies the system file path to the data directory for uploading")
+                    type=str, required=True, metavar='data-path',
+                    help="specifies the system file path to the data directory for uploading")
 
 parser.add_argument('-n', '--dataset-name', dest='dataset_name',
-    type=str, required=True, metavar='dataset-name',
-    help="specifies the name of the destination dataset")
+                    type=str, required=True, metavar='dataset-name',
+                    help="specifies the name of the destination dataset")
 
 # optional args
 parser.add_argument('-y', '--hypercube', action='store_true',
-    dest='hypercube', required=False,
-    help="commands the uploader to generate hypercube images")
+                    dest='hypercube', required=False,
+                    help="commands the uploader to generate hypercube images")
 
 parser.add_argument('-m', '--module-path', dest='module_path',
-    type=str, required=False, metavar='module-path',
-    help="specifies the system file path to the directory containing custom classes")
+                    type=str, required=False, metavar='module-path',
+                    help="specifies the system file path to the directory containing custom classes")
 
 parser.add_argument('-p', '--custom-metadata-parser', action='store_true',
-    dest='custom_metadata_parser', required=False,
-    help="commands the uploader to use a custom parser class located in the module path")
+                    dest='custom_metadata_parser', required=False,
+                    help="commands the uploader to use a custom parser class located in the module path")
 
 parser.add_argument('-i', '--custom-image-processor', action='store_true',
-    dest='custom_image_processor', required=False,
-    help="commands the uploader to use a custom image processor class located in the module path")
+                    dest='custom_image_processor', required=False,
+                    help="commands the uploader to use a custom image processor class located in the module path")
 
 args = parser.parse_args()
 data_path = args.data_path
@@ -129,7 +132,7 @@ if data_path is not None and dataset_name is not None:
     if dataset_name.strip() is "":
         print "Dataset name is empty"
         quit()
-    
+
     if args.hypercube is not None:
         hypercube = args.hypercube
 
@@ -160,5 +163,5 @@ if data_path is not None and dataset_name is not None:
     uploader = PyOmeroUploader(username=USERNAME, password=PASSWORD, server=HOST, port=PORT)
 
     # start upload process
-    uploader.launch_upload(dataset_name=dataset_name, data_path=data_path, hypercube=hypercube,\
-        parser_class=parser_class, image_processor_impl=image_processor_impl)
+    uploader.launch_upload(dataset_name=dataset_name, data_path=data_path, hypercube=hypercube,
+                           parser_class=parser_class, image_processor_impl=image_processor_impl)

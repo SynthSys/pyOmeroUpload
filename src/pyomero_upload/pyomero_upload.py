@@ -5,6 +5,9 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 from omero_data_transfer.data_transfer_manager import DataTransferManager
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 from omero_metadata_parser.aggregate_metadata import MetadataAggregator
@@ -34,15 +37,27 @@ class PyOmeroUploader:
         # conn_settings = config['omero_conn']
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
                                  image_processor=image_processor_impl())
-        broker.open_omero_session()
+        #broker.open_omero_session()
 
         data_transfer_manager = DataTransferManager(parser_class=parser_class)
-        dataset_id = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
+        results = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
 
         # upload_metadata(broker, dir_path)
-        broker.close_omero_session()
+        #broker.close_omero_session()
 
-        print ': '.join('Uploaded Dataset ID', str(dataset_id))
+        # Print results
+        image_id_list = results['image_id_list']
 
-        dataset_url = '/'.join('http:/', self.SERVER, 'webclient', '-'.join('?show=dataset', str(dataset_id)))
-        print ': '.join('Uploaded Dataset URL', dataset_url)
+        output_str = 'Number of images uploaded'
+        if hypercube is True:
+            output_str = 'Number of hypercubes uploaded'
+
+        print ': '.join([output_str, str(len(image_id_list))])
+
+        dataset_id = results['dataset_id']
+        print ': '.join(['Uploaded Dataset ID', str(dataset_id)])
+
+        dataset_param = '-'.join(['?show=dataset', str(dataset_id)])
+        dataset_url = '/'.join(['http:/', self.SERVER, 'webclient', dataset_param])
+        print ': '.join(['Uploaded Dataset URL', dataset_url])
+

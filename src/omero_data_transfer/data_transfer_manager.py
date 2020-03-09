@@ -5,6 +5,9 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 import os
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 import subprocess
@@ -73,7 +76,7 @@ class DataTransferManager:
     '''
     def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False):
         metadata = self.metadata_parser.extract_metadata(dir_path)
-        dataset_id = None
+        dataset_id, image_id_list = None, None
 
         try:
             data_broker.open_omero_session()
@@ -100,7 +103,7 @@ class DataTransferManager:
 
             data_broker.open_omero_session()
 
-            data_broker.upload_images(files_to_upload, dataset_id, hypercube)
+            image_id_list = data_broker.upload_images(files_to_upload, dataset_id, hypercube)
 
             data_broker.close_omero_session()
         except Exception as error:
@@ -108,7 +111,7 @@ class DataTransferManager:
         finally:
             data_broker.close_omero_session()
 
-        return dataset_id
+        return {'dataset_id': dataset_id, 'image_id_list': image_id_list}
 
 
 def main():
