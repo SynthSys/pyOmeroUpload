@@ -73,6 +73,7 @@ class DataTransferManager:
     '''
     def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False):
         metadata = self.metadata_parser.extract_metadata(dir_path)
+        dataset_id = None
 
         try:
             data_broker.open_omero_session()
@@ -106,6 +107,8 @@ class DataTransferManager:
             print(error)
         finally:
             data_broker.close_omero_session()
+
+        return dataset_id
 
 
 def main():

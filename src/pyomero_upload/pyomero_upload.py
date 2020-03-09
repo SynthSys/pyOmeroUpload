@@ -37,6 +37,12 @@ class PyOmeroUploader:
         broker.open_omero_session()
 
         data_transfer_manager = DataTransferManager(parser_class=parser_class)
-        data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
+        dataset_id = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
+
         # upload_metadata(broker, dir_path)
         broker.close_omero_session()
+
+        print ': '.join('Uploaded Dataset ID', str(dataset_id))
+
+        dataset_url = '/'.join('http:/', self.SERVER, 'webclient', '-'.join('?show=dataset', str(dataset_id)))
+        print ': '.join('Uploaded Dataset URL', dataset_url)
