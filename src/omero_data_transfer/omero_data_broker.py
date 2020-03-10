@@ -185,10 +185,10 @@ class OMERODataBroker:
         return annos
 
     def find_objects_by_query(self, query, params):
-        queryService = self.SESSION.getQueryService()
+        query_service = self.SESSION.getQueryService()
         # query = "select p from Project p left outer join fetch p.datasetLinks as links left outer join fetch links.child as dataset where p.id =:pid"
 
-        objects = queryService.findAllByQuery(query, params)
+        objects = query_service.findAllByQuery(query, params)
 
         return objects
 
