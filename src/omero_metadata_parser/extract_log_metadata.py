@@ -106,13 +106,13 @@ class LogMetadataParser(MetadataParser):
         for str_list in [log_metadata.authors, log_metadata.strain,
                          log_metadata.comments]:
             if str_list == log_metadata.authors:
-                description = '\n'.join([description, 'Authors: '])
+                description = '\n\n'.join([description, 'Authors: '])
 
             if str_list == log_metadata.strain:
-                description = '\n'.join([description, 'Strains: '])
+                description = '\n\n'.join([description, 'Strains: '])
 
             if str_list == log_metadata.comments:
-                description = '\n'.join([description, 'Comments: '])
+                description = '\n\n'.join([description, 'Comments: '])
 
             cur_str = ', '.join([str(elem) for elem in str_list])
             description = '\n'.join([description, cur_str])

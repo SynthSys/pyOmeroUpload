@@ -145,22 +145,26 @@ class OMERODataBroker:
         conn.setSecure(True)
         return conn
 
-    def create_dataset(self, dataset_name):
+    def create_dataset(self, dataset_name, dataset_description=None):
         dataset_obj = model.DatasetI()
         dataset_obj.setName(rtypes.rstring(dataset_name))
+
+        if dataset_description is not None:
+            dataset_obj.setDescription(dataset_description)
+
         dataset_obj = self.SESSION.getUpdateService().saveAndReturnObject(dataset_obj)
         dataset_id = dataset_obj.getId().getValue()
         return dataset_obj
 
     def retrieve_objects(self, data_type, ids=None, opts=None):
         objects = list()
-        if data_type == OMERODataType.project:
+        if data_type == str(OMERODataType.project):
             objects = self.SESSION.getContainerService().loadContainerHierarchy(
                 "Project", ids, opts)
-        elif data_type == OMERODataType.dataset:
+        elif data_type == str(OMERODataType.dataset):
             objects = self.SESSION.getContainerService().loadContainerHierarchy(
                 "Dataset", ids, opts)
-        elif data_type == OMERODataType.image:
+        elif data_type == str(OMERODataType.image):
             objects = self.SESSION.getContainerService().getUserImages(options=opts)
 
         return objects
@@ -371,6 +375,17 @@ class OMERODataBroker:
 
         return image_ids
 
+    def add_description(self, description, object_type, object_id):
+        update_service = self.SESSION.getUpdateService()
+
+        om_objects = self.retrieve_objects(object_type, [long(object_id)])
+
+        if len(om_objects) > 0:
+            om_object = om_objects[0]
+            om_object.setDescription(rtypes.rstring(description))
+
+            update_service.saveAndReturnObject(om_object)
+
     def add_tags(self, tag_values, object_type, object_id):
         update_service = self.SESSION.getUpdateService()
 
@@ -396,7 +411,7 @@ class OMERODataBroker:
                 tag_anno = update_service.saveAndReturnObject(new_tag_anno)
 
                 # do link with parent object
-                object = self.retrieve_objects(object_type, [object_id])
+                om_object = self.retrieve_objects(object_type, [long(object_id)])
 
                 link = None
 
@@ -432,7 +447,7 @@ class OMERODataBroker:
         map_anno = update_service.saveAndReturnObject(new_map_anno)
 
         # do link with parent object
-        object = self.retrieve_objects(object_type, [object_id])
+        om_object = self.retrieve_objects(object_type, [long(object_id)])
 
         link = None
 

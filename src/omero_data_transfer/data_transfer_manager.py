@@ -51,6 +51,9 @@ class DataTransferManager:
     def upload_metadata(self, dataset_id, data_broker, dir_path, metadata):
         data_broker.open_omero_session()
 
+        print metadata.description
+        data_broker.add_description(metadata.description, 'Dataset', dataset_id)
+
         # add tags to dataset
         data_broker.add_tags(metadata.tags, 'Dataset', dataset_id)
 
