@@ -5,9 +5,6 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-
 import os
 from omero_metadata_parser.metadata_parser import MetadataParser
 from omero_metadata_parser.extract_acq_metadata import AcqMetadataParser

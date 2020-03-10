@@ -5,9 +5,6 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-
 import os
 from omero_data_transfer.omero_data_broker import OMERODataBroker
 import subprocess

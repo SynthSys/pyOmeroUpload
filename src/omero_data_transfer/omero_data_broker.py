@@ -5,9 +5,6 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-import sys
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-
 import os
 from enum import Enum
 from omero.gateway import BlitzGateway, TagAnnotationWrapper, \

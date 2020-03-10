@@ -5,10 +5,6 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
-import sys
-
-sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
-
 import os
 from collections import namedtuple
 from omero_metadata_parser.metadata_parser import MetadataParser
