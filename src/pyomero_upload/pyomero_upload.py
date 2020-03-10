@@ -53,14 +53,18 @@ class PyOmeroUploader:
         if hypercube is True:
             output_str = 'Number of hypercubes uploaded'
 
-        print ': '.join([output_str, str(len(image_id_list))])
+        if image_id_list is not None:
+            print ': '.join([output_str, str(len(image_id_list))])
 
         dataset_id = results['dataset_id']
-        print ': '.join(['Uploaded Dataset ID', str(dataset_id)])
+        if dataset_id is not None:
+            print ': '.join(['Uploaded Dataset ID', str(dataset_id)])
 
-        dataset_param = '-'.join(['?show=dataset', str(dataset_id)])
-        dataset_url = '/'.join(['http:/', self.SERVER, 'webclient', dataset_param])
-        print ': '.join(['Uploaded Dataset URL', dataset_url])
+            dataset_param = '-'.join(['?show=dataset', str(dataset_id)])
+            dataset_url = '/'.join(['http:/', self.SERVER, 'webclient', dataset_param])
+            print ': '.join(['Uploaded Dataset URL', dataset_url])
+        else:
+            print 'No dataset ID generated - failed to upload dataset'
 
     def search_by_query(self, query, params):
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
