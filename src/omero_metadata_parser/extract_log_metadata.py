@@ -5,9 +5,14 @@ __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
+import sys
+
+sys.path.insert(1, '/home/jovyan/work/pyOmeroUpload/src')
+
 import os
 from collections import namedtuple
 from omero_metadata_parser.metadata_parser import MetadataParser
+from omero_metadata_parser.log_metadata import LogMetadata
 
 """
 Metadata in a Swain Lab microscope OMERO record looks like:
@@ -59,21 +64,22 @@ So our metadata structure is:
 
 LOG_METADATA_CONFIG = {
     "start_tag": "Experiment details:",
-    "attribute_tags": ["Aim:", "Strain:", "Comments:", "Brightfield:",
-                               "DIC:", "GFP:", "GFPFast:", "cy5:", "Omero project:",
-                               "Omero tags:", "Experiment started at:"],
+    "attribute_tags": ["Aim:", "Authors:", "Strain:", "Comments:", "Microscope setup for used channels:",
+                       "Brightfield:", "DIC:", "GFP:", "GFPFast:", "cy5:", "Omero project:",
+                       "Omero tags:", "Experiment started at:"],
     "end_tag": "------Time point_1------"
-    #"end_tag": "PFS is locked"
+    # "end_tag": "PFS is locked"
 }
 
 ACQ_METADATA_CONFIG = {
     "start_tag": "Experiment details:",
     "header_tags": ["Microscope name is:", "Acquisition settings are saved in:",
-                                "Experiment details:", "Omero project:", "Omero tags:",
-                                "Experiment started at:"],
+                    "Experiment details:", "Omero project:", "Omero tags:",
+                    "Experiment started at:"],
     "parse_regex_tags": [""],
     "end_tag": "Experiment started at:"
 }
+
 
 class LogMetadataParser(MetadataParser):
 
@@ -84,10 +90,34 @@ class LogMetadataParser(MetadataParser):
         log_metadata.project = self.get_str_array_val(metadata['omero project'])
         log_metadata.exp_start_date = self.get_str_array_val(metadata['experiment started at'])
 
-        if len(metadata['strain']) > 0:
-            log_metadata.strain = metadata['strain'][0]
+        log_metadata.authors = ''
+        if len(metadata['authors']) > 0:
+            log_metadata.authors = metadata['authors']
 
-        log_metadata.comments = metadata['comments']
+        if len(metadata['strain']) > 0:
+            log_metadata.strain = metadata['strain']
+
+        if len(metadata['comments']) > 0:
+            log_metadata.comments = metadata['comments']
+
+        description = log_metadata.aim
+
+        # concat the string lists into one string for description
+        for str_list in [log_metadata.authors, log_metadata.strain,
+                         log_metadata.comments]:
+            if str_list == log_metadata.authors:
+                description = '\n'.join([description, 'Authors: '])
+
+            if str_list == log_metadata.strain:
+                description = '\n'.join([description, 'Strains: '])
+
+            if str_list == log_metadata.comments:
+                description = '\n'.join([description, 'Comments: '])
+
+            cur_str = ', '.join([str(elem) for elem in str_list])
+            description = '\n'.join([description, cur_str])
+
+        log_metadata.description = description
 
         if len(metadata['brightfield']) > 0:
             log_metadata.brightfield = metadata['brightfield']
@@ -114,7 +144,6 @@ class LogMetadataParser(MetadataParser):
 
         return log_metadata
 
-
     """
     This function reads a Swain Lab microscope log file and extracts the metadata
     from the experimental metadata block at the beginning. The metadata are 
@@ -126,6 +155,7 @@ class LogMetadataParser(MetadataParser):
     should be split into multiple items as a comma-separated list, while 'comments'
     should be split based on new line chars. 
     """
+
     def extract_metadata(self, filename):
         # init the metadata attributes dict
         metadata = dict()
@@ -214,17 +244,21 @@ def main():
     filename = os.path.join(PROJECT_DIR,  "tests", "test_data", "sample_logfiles",
                               "dataset_12655", "20171205_vph1hxt1log.txt")
     '''
-    filename =  os.path.join(PROJECT_DIR, '..', 'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00', 'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt')
+    filename = os.path.join(PROJECT_DIR, '..', 'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00',
+                            'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt')
+
+    filename = os.path.join(PROJECT_DIR, '/home/jovyan/work/omero_connect_demo/test_data',
+                            'Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt')
 
     # filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles", "dataset_846", "lowglc_screen_hog1_gln3_mig1_msn2_yap1log.txt")
 
-    #filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
-      #                        "dataset_8939", "sga_glc0_1_Mig1Nhp_Maf1Nhp_Msn2Maf1_Mig1Mig1_Msn2Dot6log.txt")
+    # filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
+    #                        "dataset_8939", "sga_glc0_1_Mig1Nhp_Maf1Nhp_Msn2Maf1_Mig1Mig1_Msn2Dot6log.txt")
 
-    #filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
-      #                        "dataset_13606", "Hxt4GFP_hxt1log.txt")
+    # filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
+    #                        "dataset_13606", "Hxt4GFP_hxt1log.txt")
 
-    #filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
+    # filename = os.path.join(PROJECT_DIR, "tests", "test_data", "sample_logfiles",
     #                         "dataset_14507", "Batgirl_Morph_OldCamera_Myo1_Lte1_Bud3_Htb2_Hog1log.txt")
 
     # metadata = extract_log_metadata(filename)

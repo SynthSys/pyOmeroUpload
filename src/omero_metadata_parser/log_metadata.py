@@ -9,13 +9,14 @@ from collections import OrderedDict
 from builtins import property as _property, tuple as _tuple
 from operator import itemgetter as _itemgetter
 
+
 class LogMetadata(tuple):
     'LogMetadata()'
 
     __slots__ = ()
 
-    _fields = ('aim', 'strain', 'comments', 'brightfield', 'dic', 'gfp', 'gfpfast', 'cy5',
-               'project', 'tags', 'exp_start_date', 'table_dict', 'kvp_list')
+    _fields = ('aim', 'authors', 'strain', 'comments', 'brightfield', 'dic', 'gfp', 'gfpfast', 'cy5',
+               'project', 'description', 'tags', 'exp_start_date', 'table_dict', 'kvp_list')
 
     def __new__(_cls):
         'Create new instance of Point(x, y)'
