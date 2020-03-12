@@ -62,6 +62,15 @@ class PyOmeroUploader:
         else:
             print 'No dataset ID generated - failed to upload dataset'
 
+        return dataset_id
+
+    def searcher(self):
+        broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
+                                 image_processor=DefaultImageProcessor())
+
+        broker.open_omero_session()
+        return broker
+
     def search_by_query(self, query, params):
         broker = OMERODataBroker(username=self.USERNAME, password=self.PASSWORD, server=self.SERVER, port=self.PORT,
                                  image_processor=DefaultImageProcessor())
