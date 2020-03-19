@@ -1,3 +1,4 @@
+
 # pyOmeroUpload
 A project providing Python code for uploading data and metadata from a local file structure into an OMERO server instance.
 
@@ -19,6 +20,25 @@ bioconda-utils build --packages pyomero-upload --force
 This will force the package to rebuild regardless of whether there are any uncommitted changes. You can edit the `bioconda-recipes/recipes/pyomero-upload` `meta.yaml` and `build.sh` files as required and rerun the command. The built package can be inspected in `/opt/conda/pkgs`.
 
 ## Installation
+On a Unix-like system, the Conda package can be installed using standard installation commands:
+```
+$ conda create --name omero_upload python=2.7
+$ conda activate omero_upload
+$ conda install --channel conda-forge --channel bioconda pyomero-upload=5.4.10_1.3.0
+```
+For Windows users, Bioconda is not supported and therefore the OMEROConnect ([https://github.com/SynthSys/OMEROConnect](https://github.com/SynthSys/OMEROConnect)) Docker images must be used. The basic uploader package can be installed with the following command:
+```
+$ docker pull biordm/omero-connect:omero_uploader
+```
+Once installed, run the Docker container with this command:
+```
+$ docker run -t -d --name omero-uploader --entrypoint /bin/bash biordm/omero-connect:omero_uploader
+```
+The resulting uploader Docker container can then be accessed using the command:
+```
+$ docker exec -it omero-uploader /bin/bash
+```
+At this point, the Conda environment including the pyomero-upload package can be activated and the CLI can be invoked using the instructions below.
 
 ## Usage
 
