@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
+
+import sys
+sys.path.insert(0, '/home/jovyan/work/pyOmeroUpload2/src')
 
 import os
 import argparse
 import getpass
 import yaml
-from .pyomero_upload.pyomero_upload import PyOmeroUploader
+from pyomero_upload.pyomero_upload import PyOmeroUploader
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -99,9 +100,9 @@ elif username is not None and server is not None:
         print("Dataset name is empty")
         quit()
 
-    PASSWORD = getpass.getpass('Password: '.encode('ascii'))
-    # PASSWORD = getpass.getpass('Password: ')
-    PASSWORD = str(PASSWORD.encode('ascii')).encode('ascii')
+    #PASSWORD = getpass.getpass('Password: '.encode('ascii'))
+    PASSWORD = getpass.getpass('Password: ')
+    # PASSWORD = str(PASSWORD.encode('ascii')).encode('ascii')
     # PASSWORD = u''.join(PASSWORD)
 
     USERNAME = username
