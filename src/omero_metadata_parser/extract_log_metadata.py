@@ -12,7 +12,7 @@ from collections import namedtuple
 from omero_metadata_parser.metadata_parser import MetadataParser
 from omero_metadata_parser.log_metadata import LogMetadata
 
-"""
+r'''
 Metadata in a Swain Lab microscope OMERO record looks like:
 
     Experiment details:
@@ -58,7 +58,7 @@ So our metadata structure is:
       - GFP:
       - Omero project:
       - Omero tags:
-"""
+'''
 
 LOG_METADATA_CONFIG = {
     "start_tag": "Experiment details:",
