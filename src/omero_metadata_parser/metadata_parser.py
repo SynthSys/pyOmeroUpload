@@ -49,7 +49,7 @@ class MetadataParser(six.with_metaclass(abc.ABCMeta, object)):
                 # append the current KVP into the list
                 kvp_list.append([cur_kvp_key, cls.get_str_array_val(cur_kvp_val)])
 
-                for i in range(0, len(kvps)/2):
+                for i in range(0, int(len(kvps)/2)):
                     cur_kvp_key = kvps[0+i]
                     cur_kvp_val = kvps[1+i]
 
