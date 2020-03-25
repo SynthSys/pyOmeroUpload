@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -11,7 +9,7 @@ import os
 import argparse
 import getpass
 import yaml
-from .pyomero_upload.pyomero_upload import PyOmeroUploader
+from pyomero_upload.pyomero_upload import PyOmeroUploader
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='PyOmeroUpload Data Transfer Application')
@@ -79,7 +77,7 @@ USERNAME, PASSWORD, HOST, PORT = '', '', '', 0
 if config_file is not None:
     # validate args
     if config_file.strip() is "":
-        print("Configuration file is empty")
+        print "Configuration file is empty"
         quit()
 
     with open(config_file, 'r') as cfg:
@@ -92,11 +90,11 @@ if config_file is not None:
 elif username is not None and server is not None:
     # validate args
     if username.strip() is "":
-        print("Username is empty")
+        print "Username is empty"
         quit()
 
     if server.strip() is "":
-        print("Dataset name is empty")
+        print "Dataset name is empty"
         quit()
 
     PASSWORD = getpass.getpass('Password: '.encode('ascii'))
@@ -110,25 +108,25 @@ elif username is not None and server is not None:
 
 # validate args
 if USERNAME.strip() is "":
-    print("Username is empty")
+    print "Username is empty"
     quit()
 
 if HOST.strip() is "":
-    print("Target OMERO server is empty")
+    print "Target OMERO server is empty"
     quit()
 
 if PASSWORD.strip() is "":
-    print("Password is empty")
+    print "Password is empty"
     quit()
 
 if data_path is not None and dataset_name is not None:
     # validate args
     if data_path.strip() is "":
-        print("Data path is empty")
+        print "Data path is empty"
         quit()
 
     if dataset_name.strip() is "":
-        print("Dataset name is empty")
+        print "Dataset name is empty"
         quit()
 
     if args.hypercube is not None:

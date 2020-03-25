@@ -8,8 +8,6 @@
 
 # This script takes an Image ID, a username and a password as parameters from
 # the scripting service.
-from __future__ import absolute_import
-from __future__ import print_function
 import omero
 from omero.rtypes import rlong, rstring, unwrap
 from path import path
@@ -25,7 +23,6 @@ from omero.constants.namespaces import NSCREATED
 import glob
 import zipfile
 import re
-from six.moves import range
 
 try:
     from PIL import Image  # see ticket:2597
@@ -135,7 +132,7 @@ def check_omero_config():
 
         has_privs = True
     except Exception as e:
-        print('Exception: %s' % e)
+        print 'Exception: %s' % e
     finally:
         client.closeSession()
 
@@ -267,8 +264,8 @@ def copy_to_remote_omero(client, local_conn, script_params):
                         dataset_name)
                     return message
 
-                print(("Processing {} images, in dataset {}".format(
-                    len(images), dataset_name)))
+                print("Processing {} images, in dataset {}".format(
+                    len(images), dataset_name))
                 # TODO use remote_ds id, instead of target ds name
                 uploaded_image_ids = upload_images(cli, images, managed_dir,
                                                    target_dataset, remote_conn, local_conn,
@@ -276,7 +273,7 @@ def copy_to_remote_omero(client, local_conn, script_params):
         else:
             images = objects
 
-            print(("Processing %s images" % len(images)))
+            print("Processing %s images" % len(images))
             uploaded_image_ids = upload_images(cli, images, managed_dir,
                                                None, remote_conn, local_conn, None, image_format)
     finally:
@@ -319,7 +316,7 @@ def upload_dataset(cli, ds, remote_conn, local_conn):
     with open(temp_file, 'r') as tf:
         txt = tf.readline()
         uploaded_dataset_id = re.findall(r'\d+', txt)[0]
-    print("uploaded dataset ", uploaded_dataset_id)
+    print "uploaded dataset ", uploaded_dataset_id
     remote_ds = remote_conn.getObject("Dataset", uploaded_dataset_id)
     # TODO add description and tags for dataset
     add_attachments(ds, remote_ds, remote_conn, local_conn)
@@ -485,7 +482,7 @@ def save_planes_for_image(conn, image, size_c, split_cs, merged_cs,
         t_indexes = [image.getDefaultT()+1]
     else:
         if len(t_range) > 1:
-            t_indexes = list(range(t_range[0], t_range[1]))
+            t_indexes = range(t_range[0], t_range[1])
         else:
             t_indexes = [t_range[0]]
 
@@ -700,9 +697,9 @@ def upload_images(cli, images, managed_dir, target_dataset, remote_conn,
     uploaded_image_id = ''
 
     for image in images:
-        print(("Processing image: ID %s: %s" % (image.id, image.getName())))
+        print("Processing image: ID %s: %s" % (image.id, image.getName()))
         desc = image.getDescription()
-        print("Description: ", desc)
+        print "Description: ", desc
         temp_file = NamedTemporaryFile().name
 
         if len(list(image.getImportedImageFiles())) > 0:
@@ -768,7 +765,7 @@ def upload_images(cli, images, managed_dir, target_dataset, remote_conn,
         add_channel_labels(image, remote_image, remote_conn)
         add_attachments(image, remote_image, remote_conn, local_conn, remote_ds)
 
-    print("ids are: ", uploaded_image_ids)
+    print "ids are: ", uploaded_image_ids
     return uploaded_image_ids
 
 
@@ -799,7 +796,7 @@ def add_attachments(local_item, remote_item, remote_conn, local_conn,
     # Finding these so we can check for duplications.
     for existing_ann in remote_item.listAnnotations():
         if existing_ann.OMERO_TYPE == omero.model.TagAnnotationI:
-            print("Tag is already there: ", existing_ann.getTextValue())
+            print "Tag is already there: ", existing_ann.getTextValue()
 
             if not existing_ann.getTextValue() in pre_loaded_tags:
                 pre_loaded_tags.append(existing_ann.getTextValue())
@@ -807,7 +804,7 @@ def add_attachments(local_item, remote_item, remote_conn, local_conn,
     if remote_ds != None:
         for existing_ann in remote_ds.listAnnotations():
             if existing_ann.OMERO_TYPE == omero.model.TagAnnotationI:
-                print("Tag is already there: ", existing_ann.getTextValue())
+                print "Tag is already there: ", existing_ann.getTextValue()
 
                 if not existing_ann.getTextValue() in pre_loaded_tags:
                     pre_loaded_tags.append(existing_ann.getTextValue())
@@ -861,9 +858,9 @@ def add_attachments(local_item, remote_item, remote_conn, local_conn,
                 remote_ann = remote_conn.createFileAnnfromLocalFile(
                     file_path, mimetype=mime, ns=namespace, desc=description)
                 # TODO this message would be better if it said if adding to image or dataset
-                print("Attaching FileAnnotation to Item: ", "File ID:",\
+                print "Attaching FileAnnotation to Item: ", "File ID:",\
                     remote_ann.getId(),  ",", remote_ann.getFile().getName(), \
-                    "Size:", remote_ann.getFile().getSize())
+                    "Size:", remote_ann.getFile().getSize()
             else:
                 local_raw_file_store = local_conn.c.sf.createRawFileStore()
                 local_raw_file_store.setFileId(file_to_upload.getId())

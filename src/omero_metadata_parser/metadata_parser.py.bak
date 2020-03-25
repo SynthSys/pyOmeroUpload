@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-import six
-from six.moves import range
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
 
 import abc
 
-class MetadataParser(six.with_metaclass(abc.ABCMeta, object)):
+class MetadataParser(object):
+    __metaclass__ = abc.ABCMeta
+
     @abc.abstractmethod
     def extract_metadata(self, filename):
         raise NotImplementedError('users must define extract_metadata to use this base class')

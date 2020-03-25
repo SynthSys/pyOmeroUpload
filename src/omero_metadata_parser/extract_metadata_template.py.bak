@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-import six
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -84,7 +82,7 @@ class TemplateMetadataParser(MetadataParser):
 
     # Extract values from nested dictionary by key
     def find_by_key(self, data, target):
-        for key, value in six.iteritems(data):
+        for key, value in data.iteritems():
             if isinstance(value, dict):
                 for ele in self.find_by_key(value, target):
                     yield ele
@@ -94,9 +92,9 @@ class TemplateMetadataParser(MetadataParser):
 
     # retrieve a dictionary in the config based on a key it contains
     def get_dict_by_child_key(self, data, sibling_key):
-        for key, value in six.iteritems(data):
+        for key, value in data.iteritems():
             if isinstance(value, dict):
-                if sibling_key in list(value.keys()):
+                if sibling_key in value.keys():
                     yield {key:value}
                     # yield value
                 else:
@@ -175,7 +173,7 @@ class TemplateMetadataParser(MetadataParser):
             # is_dict_section = False
 
             # append the matching value into the metadata data stuct
-        if "data_type" in list(value_dict.keys()):
+        if "data_type" in value_dict.keys():
             if value_dict["data_type"] == "LIST":
                 is_list_section = True
                 cur_metadata_list = list()
@@ -183,16 +181,16 @@ class TemplateMetadataParser(MetadataParser):
 
                 value_dict["values"] = cur_metadata_list
 
-                if "value_regex" in list(value_dict.keys()):
+                if "value_regex" in value_dict.keys():
                     cur_key_label_regex = value_dict["value_regex"]
 
                 # this will take several iterations, so set the current attr state
-                if "label" in list(value_dict.keys()):
+                if "label" in value_dict.keys():
                     cur_metadata_attr = value_dict["label"]
                 else:
-                    cur_metadata_attr = list(metadata_section.keys())[0]
+                    cur_metadata_attr = metadata_section.keys()[0]
 
-                if "values" in list(value_dict.keys()):
+                if "values" in value_dict.keys():
                     values = value_dict["values"]
                     values.append(match.string)
                 else:
@@ -201,10 +199,10 @@ class TemplateMetadataParser(MetadataParser):
             elif value_dict["data_type"] == "TABLE":
                 is_table_section = True
                 # this will take several iterations, so set the current attr state
-                if "label" in list(value_dict.keys()):
+                if "label" in value_dict.keys():
                     cur_metadata_attr = value_dict["label"]
                 else:
-                    cur_metadata_attr = list(metadata_section.keys())[0]
+                    cur_metadata_attr = metadata_section.keys()[0]
             elif value_dict["data_type"] == "DICT":
                 is_dict_section = True
                 cur_metadata_dict = dict()
@@ -213,14 +211,14 @@ class TemplateMetadataParser(MetadataParser):
                 # cur_dict_section = metadata_section
                 value_dict["values"] = cur_metadata_dict
 
-                if "key_label_regex" in list(value_dict.keys()):
+                if "key_label_regex" in value_dict.keys():
                     cur_key_label_regex = value_dict["key_label_regex"]
 
                 # this will take several iterations, so set the current attr state
-                if "label" in list(value_dict.keys()):
+                if "label" in value_dict.keys():
                     cur_metadata_attr = value_dict["label"]
                 else:
-                    cur_metadata_attr = list(metadata_section.keys())[0]
+                    cur_metadata_attr = metadata_section.keys()[0]
 
         metadata_section = MetadataSection(cur_metadata_attr, is_dict_section,
                                         is_table_section, cur_metadata_dict, cur_key_label_regex)
@@ -264,7 +262,7 @@ class TemplateMetadataParser(MetadataParser):
                             cur_dict_key = part
                             metadata_dict[part] = list()
                         else:
-                            for key, value in six.iteritems(label_regex):
+                            for key, value in label_regex.iteritems():
                                 rx = re.compile(value)
                                 match = rx.search(safe_text)
 

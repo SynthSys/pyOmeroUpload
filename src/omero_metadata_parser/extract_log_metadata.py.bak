@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -235,7 +233,7 @@ class LogMetadataParser(MetadataParser):
 
 def main():
     PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-    print(PROJECT_DIR)
+    print PROJECT_DIR
     '''
     filename = os.path.join(PROJECT_DIR, "tests", "test_data", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00", "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1log.txt")
 
@@ -280,10 +278,10 @@ def main():
     log_metadata.exp_start_date = metadata['experiment started at']
 
     print log_metadata'''
-    print(metadata.tags)
-    print(metadata.strain)
-    print(metadata.dic)
-    print(metadata.gfpfast)
+    print metadata.tags
+    print metadata.strain
+    print metadata.dic
+    print metadata.gfpfast
 
 
 if __name__ == "__main__":

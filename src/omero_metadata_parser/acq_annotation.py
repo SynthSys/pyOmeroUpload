@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from six.moves import zip
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -28,7 +30,7 @@ class AcqAnnotation(tuple):
 
     def _asdict(self):
         'Return a new OrderedDict which maps field names to their values'
-        return OrderedDict(zip(self._fields, self))
+        return OrderedDict(list(zip(self._fields, self)))
 
     def __getnewargs__(self):
         'Return self as a plain tuple.  Used by copy and pickle.'

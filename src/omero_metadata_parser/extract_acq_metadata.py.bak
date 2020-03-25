@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
-from six.moves import map
-from six.moves import zip
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -108,7 +104,7 @@ class AcqMetadataParser(MetadataParser):
         search_res = re.split(rx, line)
 
         # retrieve the corresponding param name in output form
-        idx = list(switch_params_in.keys()).index(param_name)
+        idx = switch_params_in.keys().index(param_name)
         param_name_out = list(switch_params)[idx]
 
         if search_res is not None:
@@ -153,7 +149,7 @@ class AcqMetadataParser(MetadataParser):
         # if search_res is not None:
         if len(search_res) > 0:
             search_res = re.split(row_rx, line)
-            df.loc[len(df)] = list([_f for _f in search_res if _f])
+            df.loc[len(df)] = list(filter(None, search_res))
         else:
             header_rx = re.compile(raw_header_rx)
             search_res = re.findall(header_rx, line)
@@ -221,9 +217,9 @@ class AcqMetadataParser(MetadataParser):
             search_res = re.findall(rx, line)
 
             if len(search_res) > 0:
-                search_res = list([_f for _f in re.split(rx, line) if _f])
+                search_res = list(filter(None, re.split(rx, line)))
 
-                time_dict = dict(list(zip(time_dict_keys, search_res)))
+                time_dict = dict(zip(time_dict_keys, search_res))
                 return
 
             return section_name
@@ -262,7 +258,7 @@ class AcqMetadataParser(MetadataParser):
     def extract_metadata(self, filename):
         global section_line_num
 
-        section_rxs = list(map(re.compile, raw_section_rxs))
+        section_rxs = map(re.compile, raw_section_rxs)
 
         active_section = None
 
@@ -318,7 +314,7 @@ def main():
     global switch_params
 
     PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-    print(PROJECT_DIR)
+    print PROJECT_DIR
     input_path = os.path.join(PROJECT_DIR, '..', 
                               "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1_00",
                               "Morph_Batgirl_OldCamera_Htb2_Myo1_Hog1_Lte1_Vph1Acq.txt")
@@ -344,11 +340,11 @@ def main():
     metadata_parser = AcqMetadataParser()
     metadata = metadata_parser.extract_metadata(input_path)
 
-    print(metadata.channels)
-    print(metadata.times)
-    print(metadata.switch_params)
-    print(metadata.zsections)
-    print(metadata.positions)
+    print metadata.channels
+    print metadata.times
+    print metadata.switch_params
+    print metadata.zsections
+    print metadata.positions
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -50,7 +48,7 @@ class DataTransferManager:
     def upload_metadata(self, dataset_id, data_broker, dir_path, metadata):
         data_broker.open_omero_session()
 
-        print(metadata.description)
+        print metadata.description
         data_broker.add_description(metadata.description, 'Dataset', dataset_id)
 
         # add tags to dataset

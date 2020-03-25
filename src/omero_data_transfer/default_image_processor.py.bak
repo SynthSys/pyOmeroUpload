@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from six.moves import range
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -169,7 +167,7 @@ class DefaultImageProcessor(ImageProcessor):
 
         # code below here is very similar to combineImages.py
         # create an image in OMERO and populate the planes with numpy 2D arrays
-        channelList = list(range(sizeC))
+        channelList = range(sizeC)
         imageId = pixels_service.createImage(
             sizeX, sizeY, sizeZ, sizeT, channelList,
             pixelsType, imageName, description)

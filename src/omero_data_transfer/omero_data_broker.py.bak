@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 __author__ = "Johnny Hay"
 __copyright__ = "BioRDM"
 __license__ = "mit"
@@ -26,7 +25,7 @@ import numpy as np
 from threading import Thread, BoundedSemaphore
 from multiprocessing.pool import ThreadPool
 from functools import partial
-from .image_processor import ImageProcessor
+from image_processor import ImageProcessor
 from omero_data_transfer.default_image_processor import DefaultImageProcessor
 import subprocess
 
@@ -376,7 +375,7 @@ class OMERODataBroker:
     def add_description(self, description, object_type, object_id):
         update_service = self.SESSION.getUpdateService()
 
-        om_objects = self.retrieve_objects(object_type, [int(object_id)])
+        om_objects = self.retrieve_objects(object_type, [long(object_id)])
 
         if len(om_objects) > 0:
             om_object = om_objects[0]
@@ -409,7 +408,7 @@ class OMERODataBroker:
                 tag_anno = update_service.saveAndReturnObject(new_tag_anno)
 
                 # do link with parent object
-                om_object = self.retrieve_objects(object_type, [int(object_id)])
+                om_object = self.retrieve_objects(object_type, [long(object_id)])
 
                 link = None
 
@@ -445,7 +444,7 @@ class OMERODataBroker:
         map_anno = update_service.saveAndReturnObject(new_map_anno)
 
         # do link with parent object
-        om_object = self.retrieve_objects(object_type, [int(object_id)])
+        om_object = self.retrieve_objects(object_type, [long(object_id)])
 
         link = None
 

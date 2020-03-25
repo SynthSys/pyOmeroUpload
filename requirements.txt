@@ -24,3 +24,4 @@ scipy==1.2.1
 requests==2.22.0
 filetype==1.0.5
 future==0.18.2
+six==1.14.0
