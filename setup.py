@@ -150,7 +150,19 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=[],  # Optional
+    install_requires=[
+        'pytest==5.4.1',
+        'pytest-cov==2.8.1',
+        'pillow==7.0.0',
+        'enum34==1.1.10',
+        'pyyaml==5.3.1',
+        'pandas==1.0.3',
+        'scipy==1.4.1',
+        'requests==2.23.0',
+        'filetype==1.0.6',
+        'future==0.18.2',
+        'six==1.14.0',
+    ],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
