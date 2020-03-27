@@ -6,8 +6,6 @@ __copyright__ = "BioRDM"
 __license__ = "mit"
 
 import sys
-sys.path.insert(0, '/home/jovyan/work/pyOmeroUpload2/src')
-
 import os
 import argparse
 import getpass
