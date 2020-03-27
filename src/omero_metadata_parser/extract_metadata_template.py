@@ -42,7 +42,7 @@ AttributeKVP = namedtuple('AttributeKVP',
 class TemplateMetadataParser(MetadataParser):
 
     def create_acq_metadata_obj(self, metadata):
-        acq_metadata = namedtuple('AcqMetadata', [], verbose=False)
+        acq_metadata = namedtuple('AcqMetadata', [])
 
         acq_metadata.channels = self.get_str_array_val(metadata['channels'])
         acq_metadata.zsections = self.get_str_array_val(metadata['zsections'])
@@ -57,7 +57,7 @@ class TemplateMetadataParser(MetadataParser):
 
 
     def create_log_metadata_obj(self, metadata):
-        log_metadata = namedtuple('LogMetadata', [], verbose=False)
+        log_metadata = namedtuple('LogMetadata', [])
 
         metadata['timepoint'] = list()
 

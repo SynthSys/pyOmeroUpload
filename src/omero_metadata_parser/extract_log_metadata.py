@@ -82,7 +82,7 @@ ACQ_METADATA_CONFIG = {
 class LogMetadataParser(MetadataParser):
 
     def create_log_metadata_obj(self, metadata):
-        log_metadata = namedtuple('LogMetadata', [], verbose=False)
+        log_metadata = namedtuple('LogMetadata', [])
 
         log_metadata.aim = self.get_str_array_val(metadata['aim'])
         log_metadata.project = self.get_str_array_val(metadata['omero project'])
@@ -262,7 +262,7 @@ def main():
     # metadata = extract_log_metadata(filename)
     metadata_parser = LogMetadataParser()
     metadata = metadata_parser.extract_metadata(filename)
-    '''log_metadata = namedtuple('LogMetadata', [], verbose=False)
+    '''log_metadata = namedtuple('LogMetadata', [])
     log_metadata.aim = metadata['aim'][0]
 
     if len(metadata['strain']) > 0:

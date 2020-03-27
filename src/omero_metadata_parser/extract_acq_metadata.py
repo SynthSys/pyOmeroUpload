@@ -239,7 +239,7 @@ class AcqMetadataParser(MetadataParser):
 
 
     def create_acq_metadata_obj(self):
-        acq_annot = namedtuple('AcqAnnotation', [], verbose=False)
+        acq_annot = namedtuple('AcqAnnotation', [])
         acq_annot.channels = channel_table
         acq_annot.zsections = zsect_table
         acq_annot.times = time_dict
