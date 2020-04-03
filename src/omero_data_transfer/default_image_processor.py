@@ -196,7 +196,7 @@ class DefaultImageProcessor(ImageProcessor):
             link.child = model.ImageI(imageId, False)
             update_service.saveAndReturnObject(link)
 
-        print(':'.join("Hypercube successfully uploaded", imageId))
+        print(': '.join(["Hypercube successfully uploaded", imageId]))
 
         return imageId
 
