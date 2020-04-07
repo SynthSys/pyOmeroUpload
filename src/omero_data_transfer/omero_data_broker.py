@@ -312,6 +312,7 @@ class OMERODataBroker:
                 image = script_utils.createNewImage(self.SESSION, [planes], filename, "An image", dataset)
 
         if image is not None:
+            print(': '.join(["Image file successfully uploaded", str(image.getId().getValue())]))
             return image.getId().getValue()
         else:
             return
