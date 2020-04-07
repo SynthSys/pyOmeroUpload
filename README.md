@@ -1,9 +1,48 @@
+
 # pyOmeroUpload
 A project providing Python code for uploading data and metadata from a local file structure into an OMERO server instance.
 
-## Installation
+## Building the Distribution
+When building a distribution for release through BioConda, the Python setuptools are used. From the top directory, run either `python setup.py sdist` for a source distribution or `python setup.py bdist` for a binary distribution. If you receive an error relating to tag names and SCM, this has been traced to the .git/packed-refs file, which contains references to the Git branches and tags in the repository. For some reason, the PyScaffold/setuptools break when tags are present in this file. Therefore, lines in the packed-refs file that related to tags must be commented-out to allow the distribution to build.
 
-## <a name="upload_cli">Uploading with the Upload CLI</a>
+### Testing the Distribution
+Before submitting the pull request to bioconda, it's a good idea to test that the new package is built properly. In a Linux system with Docker installed, run the following commands to test locally:
+
+```
+docker pull bioconda/bioconda-utils-build-env:latest
+docker run -td bioconda/bioconda-utils-build-env /bin/bash
+docker exec -it distracted_bartik /bin/bash
+git clone https://github.com/SynthSys/bioconda-recipes
+cd bioconda-recipes
+git checkout pyOmeroUpload-recipe
+bioconda-utils build --packages pyomero-upload --force
+```
+This will force the package to rebuild regardless of whether there are any uncommitted changes. You can edit the `bioconda-recipes/recipes/pyomero-upload` `meta.yaml` and `build.sh` files as required and rerun the command. The built package can be inspected in `/opt/conda/pkgs`.
+
+## Installation
+On a Unix-like system, the Conda package can be installed using standard installation commands:
+```
+$ conda create --name omero_upload python=2.7
+$ conda activate omero_upload
+$ conda install --channel conda-forge --channel bioconda pyomero-upload=5.4.10_1.3.0
+```
+For Windows users, Bioconda is not supported and therefore the OMEROConnect ([https://github.com/SynthSys/OMEROConnect](https://github.com/SynthSys/OMEROConnect)) Docker images must be used. The basic uploader package can be installed with the following command:
+```
+$ docker pull biordm/omero-connect:omero_uploader
+```
+Once installed, run the Docker container with this command:
+```
+$ docker run -t -d --name omero-uploader --entrypoint /bin/bash biordm/omero-connect:omero_uploader
+```
+The resulting uploader Docker container can then be accessed using the command:
+```
+$ docker exec -it omero-uploader /bin/bash
+```
+At this point, the Conda environment including the pyomero-upload package can be activated and the CLI can be invoked using the instructions below.
+
+## Usage
+
+### <a name="upload_cli">Uploading with the Upload CLI</a>
 A very basic use case for uploading a set of test images as hypercubes and accompanying metadata, as provided in [https://github.com/SynthSys/omero_connect_demo](https://github.com/SynthSys/omero_connect_demo) using the default metadata parser is as follows (and you will be prompted for the password):
 ```
 /opt/conda/bin/python -m pyomero_upload/upload_cli -d test_data -n test_upload -u user -s demo.openmicroscopy.org -y

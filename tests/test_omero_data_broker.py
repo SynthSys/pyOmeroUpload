@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import print_function
 import pytest
-import omero
+from omero_data_transfer.omero_data_broker import OMERODataType, OMERODataBroker
 import os,sys,inspect
 
 # make src directory accessible to tests
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.join(os.path.dirname(currentdir), 'src')
-sys.path.insert(0,parentdir)
-
-from omero_data_transfer.omero_data_broker import OMERODataType, OMERODataBroker
+# sys.path.insert(0,parentdir)
 
 __author__ = "Johnny Hay"
-__copyright__ = "Johnny Hay"
+__copyright__ = "BioRDM"
 __license__ = "mit"
 
 
@@ -22,17 +22,22 @@ class TestOmeroDataBroker:
 
     @pytest.fixture(scope="class")
     def omero_data_broker(self):
+        CONFIG = {}
+        CONFIG['username'] = 'test'
+        CONFIG['password'] = 'test'
+        CONFIG['server'] = 'localhost'
+        CONFIG['port'] =  4064
         '''Returns a default OMERO data broker for localhost'''
-        return OMERODataBroker(username="test",
-                               password="test", host="localhost",
-                               port=4064)
+        return OMERODataBroker(CONFIG)
 
     @pytest.fixture(scope="class")
     def omero_session(self, omero_data_broker):
-        broker = OMERODataBroker(username="test",
-                                 password="test", host="localhost",
-                                 port=4064)
-        print omero_data_broker.HOST
+        CONFIG = {}
+        CONFIG['username'] = 'test'
+        CONFIG['password'] = 'test'
+        CONFIG['server'] = 'localhost'
+        CONFIG['port'] =  4064
+        broker = OMERODataBroker(CONFIG)
         omero_data_broker.open_omero_session()
         print("teardown smtp")
         # broker.close_omero_session()
@@ -46,7 +51,7 @@ class TestOmeroDataBroker:
         omero_data_broker.open_omero_session()
         dataset_obj = omero_data_broker.create_dataset()
         assert hasattr(dataset_obj, 'id')
-        print "New dataset, Id:", dataset_obj.getId().getValue()
+        print("New dataset, Id:", dataset_obj.getId().getValue())
         omero_data_broker.close_omero_session()
 
     def test_get_projects(self, omero_data_broker):
@@ -64,5 +69,5 @@ class TestOmeroDataBroker:
 
         if projects is not None:
             for project in projects:
-                print project
+                print(project)
         omero_data_broker.close_omero_session()

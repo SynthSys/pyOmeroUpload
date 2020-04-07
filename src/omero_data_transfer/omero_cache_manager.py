@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import print_function
 from collections import namedtuple
 import os
 import yaml
@@ -12,32 +14,23 @@ import numpy as np
 import re
 from datetime import datetime as dt
 
+
 OmeroCache = namedtuple('OmeroCache', 'Datasets Tags Projects')
-
-PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
-
-CONFIG_FILE = os.path.join(PROJECT_DIR, 'config.yml')
-CONFIG = {}
 
 DATE_FORMAT_1 = "%d-%b-%Y"
 DATE_FORMAT_2 = "%Y_%b_%d"
 DATE_TAG_FORMAT = "%Y-%m-%d"
 
-with open(CONFIG_FILE, 'r') as cfg:
-    CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+PROJECT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 
 
 class OmeroCacheManager():
     # OmeroCode/@OmeroDatabase/createDbInfo.m
     def create_db_info(self, data_broker):
-        print 'here'
         data_broker.open_omero_session()
 
         projects = data_broker.retrieve_objects(OMERODataType.project, None,
                                                 None)
-
-        for project in projects:
-            print project
 
         data_broker.close_omero_session()
 
@@ -60,11 +53,9 @@ class OmeroCacheManager():
 
         dbData = sio.loadmat(os.path.join(dir_path, 'dbData.mat'))
 
-        print dbData
-
     # essentially this function is translated from `OmeroDatabase.createDbInfo`
     def create_db_info(self, data_broker):
-        print "balls"
+        pass
 
     # essentially this function is translated from `OmeroDatabase.saveDbData`
     def save_db_data(self, data_broker):
@@ -78,7 +69,6 @@ class OmeroCacheManager():
         db_data["data"] = db_data_list
 
         for p_idx, project in enumerate(projects):
-            print project
             # use container query to retrieve datasets/metadata
             ds_ids, ds_names, ds_descs = list(), list(), list()
 
@@ -169,11 +159,9 @@ class OmeroCacheManager():
 
         tag_types = list(tag_anno.getDescription().getValue() for tag_anno in
                          tag_annotations if tag_anno.getDescription() is not None)
-        print tag_types
 
         tag_strs = list(tag_anno.getTextValue().getValue() for tag_anno in
                         tag_annotations if tag_anno.getDescription() is not None)
-        print tag_strs
 
         date = None
         date_str = ""
@@ -244,11 +232,14 @@ class OmeroCacheManager():
 
 
 def main():
-    conn_settings = CONFIG['prod_settings']['omero_conn']
-    broker = OMERODataBroker(username=conn_settings['username'],
-                             password=conn_settings['password'],
-                             host=conn_settings['server'],
-                             port=conn_settings['port'])
+    CONFIG_FILE = os.path.join(PROJECT_DIR, 'config_test.yml')
+    CONFIG = {}
+
+    with open(CONFIG_FILE, 'r') as cfg:
+        CONFIG = yaml.load(cfg, Loader=yaml.FullLoader)
+
+    conn_settings = CONFIG['omero_conn']
+    broker = OMERODataBroker(conn_settings)
 
     cache_manager = OmeroCacheManager()
     # broker.open_omero_session()

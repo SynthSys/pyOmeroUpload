@@ -1,13 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
+from six.moves import zip
+__author__ = "Johnny Hay"
+__copyright__ = "BioRDM"
+__license__ = "mit"
+
 from collections import OrderedDict
 from builtins import property as _property, tuple as _tuple
 from operator import itemgetter as _itemgetter
 
-class MetadataSection(tuple):
+class AcqAnnotation(tuple):
     'AcqAnnotation()'
 
     __slots__ = ()
 
-    _fields = ('id', 'label', 'regex', 'data_type', 'rx')
+    _fields = ('channels', 'zsections', 'times', 'positions', 'npumps',
+               'pump_init', 'switch_params', 'table_dict', 'kvp_list')
 
     def __new__(_cls):
         'Create new instance of Point(x, y)'
@@ -15,12 +25,12 @@ class MetadataSection(tuple):
 
     def __repr__(self):
         'Return a nicely formatted representation string'
-        return 'MetadataSection(id=%r, label=%r, regex=%r, data_type=%r,' \
-               'rx=%r)' % self
+        return 'Point(channels=%r, zsections=%r, times=%r, positions=%r,' \
+               'npumps=%r, pump_init=%r, switch_params=%r)' % self
 
     def _asdict(self):
         'Return a new OrderedDict which maps field names to their values'
-        return OrderedDict(zip(self._fields, self))
+        return OrderedDict(list(zip(self._fields, self)))
 
     def __getnewargs__(self):
         'Return self as a plain tuple.  Used by copy and pickle.'
@@ -32,6 +42,6 @@ class MetadataSection(tuple):
         'Exclude the OrderedDict from pickling'
         pass
 
-    id = _property(_itemgetter(0), doc='Alias for field id')
+    channels = _property(_itemgetter(0), doc='Alias for field channels')
 
-    label = _property(_itemgetter(1), doc='Alias for field label')
+    zsections = _property(_itemgetter(1), doc='Alias for field zsections')
