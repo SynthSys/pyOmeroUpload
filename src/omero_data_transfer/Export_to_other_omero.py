@@ -12,7 +12,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 import omero
 from omero.rtypes import rlong, rstring, unwrap
-from path import path
 import os
 import omero.cli
 import omero.scripts as scripts
@@ -312,7 +311,7 @@ def upload_dataset(cli, ds, remote_conn, local_conn):
 
     name_cmd = 'name=' + ds.getName()
     desc_cmd = "description="+ ds.getDescription()
-    with open(temp_file, 'wr') as tf, stdout_redirected(tf):
+    with open(temp_file, 'w+') as tf, stdout_redirected(tf):
             # bin/omero obj new Dataset name='new_dataset'
             cli.onecmd(["obj", "new", "Dataset", name_cmd, desc_cmd])
 
@@ -711,7 +710,7 @@ def upload_images(cli, images, managed_dir, target_dataset, remote_conn,
                 file_loc = os.path.join(managed_dir, f.path, f.name)
                 # This temp_file is a work around to get hold of the id of uploaded
                 # images from stdout.
-                with open(temp_file, 'wr') as tf, stdout_redirected(tf):
+                with open(temp_file, 'w+') as tf, stdout_redirected(tf):
                     if target_dataset:
                         cli.onecmd(["import", file_loc, '-T', target_dataset,
                                     '--description', desc, '--no-upgrade-check'])
@@ -748,7 +747,7 @@ def upload_images(cli, images, managed_dir, target_dataset, remote_conn,
 
                 # This temp_file is a work around to get hold of the id of uploaded
                 # images from stdout.
-                with open(temp_file, 'wr') as tf, stdout_redirected(tf):
+                with open(temp_file, 'w+') as tf, stdout_redirected(tf):
                     if target_dataset:
                         cli.onecmd(["import", file_loc, '-T', target_dataset,
                                     '--description', desc, '--no-upgrade-check'])
