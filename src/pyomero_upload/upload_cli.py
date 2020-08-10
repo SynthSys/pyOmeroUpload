@@ -64,11 +64,15 @@ parser.add_argument('-i', '--custom-image-processor', action='store_true',
                     dest='custom_image_processor', required=False,
                     help="commands the uploader to use a custom image processor class located in the module path")
 
+parser.add_argument('-v', '--include-provenance-metadata', action='store_true',
+                    dest='include_provenance_kvps', required=False,
+                    help="instructs the uploader to automatically include provenenance metadata")
+
 args = parser.parse_args()
 data_path = args.data_path
 dataset_name = args.dataset_name
 config_file = args.config_file
-hypercube, custom_metadata_parser, custom_image_processor = False, False, False
+hypercube, custom_metadata_parser, custom_image_processor, include_provenance_kvps = False, False, False, True
 module_path = ''
 
 username = args.username
@@ -133,6 +137,9 @@ if data_path is not None and dataset_name is not None:
     if args.hypercube is not None:
         hypercube = args.hypercube
 
+    if args.include_provenance_kvps is not None:
+        include_provenance_kvps = args.include_provenance_kvps
+
     parser_class, image_processor_impl = None, None
 
     if args.module_path is not None and args.module_path.strip() is not '':
@@ -161,4 +168,5 @@ if data_path is not None and dataset_name is not None:
 
     # start upload process
     uploader.launch_upload(dataset_name=dataset_name, data_path=data_path, hypercube=hypercube,
-                           parser_class=parser_class, image_processor_impl=image_processor_impl)
+                           parser_class=parser_class, image_processor_impl=image_processor_impl,
+                           include_provenance_kvps=include_provenance_kvps)

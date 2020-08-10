@@ -23,7 +23,8 @@ class PyOmeroUploader:
 
     # initialise broker and manager with the given parameters and start the upload process 
     def launch_upload(self, dataset_name, data_path, hypercube=False,
-                      parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor):
+                      parser_class=MetadataAggregator, image_processor_impl=DefaultImageProcessor,
+                      include_provenance_kvps=True):
 
         # override `parser_class` for custom metadata extractor implementations
         if parser_class is None:
@@ -39,7 +40,8 @@ class PyOmeroUploader:
         # broker.open_omero_session()
 
         data_transfer_manager = DataTransferManager(parser_class=parser_class)
-        results = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube)
+        results = data_transfer_manager.upload_data_dir(broker, dataset_name, data_path, hypercube=hypercube,
+                                                        include_provenance_kvps=include_provenance_kvps)
 
         # upload_metadata(broker, dir_path)
         # broker.close_omero_session()

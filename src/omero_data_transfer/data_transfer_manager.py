@@ -76,8 +76,13 @@ class DataTransferManager:
     essentially the same thing 
     (https://docs.openmicroscopy.org/omero/5.4.10/users/cli/import.html).
     '''
-    def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False):
+    def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False, include_provenance_kvps=True):
         metadata = self.metadata_parser.extract_metadata(dir_path)
+
+        if include_provenance_kvps == True:
+            metadata.kvp_list.append(['Uploaded With', 'pyOmeroUpload 2.1.0'])
+            metadata.kvp_list.append(['PyOmeroUpload', 'https://github.com/SynthSys/pyOmeroUpload'])
+
         dataset_id, image_id_list = None, None
 
         try:
