@@ -65,7 +65,7 @@ parser.add_argument('-i', '--custom-image-processor', action='store_true',
                     help="commands the uploader to use a custom image processor class located in the module path")
 
 parser.add_argument('-v', '--include-provenance-metadata', action='store_true',
-                    dest='include_provenance_kvps', required=False,
+                    dest='include_provenance_kvps', required=False, default=True,
                     help="instructs the uploader to automatically include provenenance metadata")
 
 args = parser.parse_args()

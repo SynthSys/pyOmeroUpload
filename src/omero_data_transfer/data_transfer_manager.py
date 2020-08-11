@@ -47,7 +47,7 @@ class DataTransferManager:
 
         return args
 
-    def upload_metadata(self, dataset_id, data_broker, dir_path, metadata):
+    def upload_metadata(self, dataset_id, data_broker, dir_path, metadata, include_provenance_kvps):
         data_broker.open_omero_session()
 
         print(metadata.description)
@@ -62,6 +62,10 @@ class DataTransferManager:
 
         # do key:value pairs
         kvp_list = metadata.kvp_list
+
+        if include_provenance_kvps == True:
+            kvp_list.append(['Uploaded With', 'pyOmeroUpload 2.1.0'])
+            kvp_list.append(['PyOmeroUpload', 'https://github.com/SynthSys/pyOmeroUpload'])
 
         data_broker.add_kvps(kvp_list, 'Dataset', dataset_id)
 
@@ -78,10 +82,6 @@ class DataTransferManager:
     '''
     def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False, include_provenance_kvps=True):
         metadata = self.metadata_parser.extract_metadata(dir_path)
-
-        if include_provenance_kvps == True:
-            metadata.kvp_list.append(['Uploaded With', 'pyOmeroUpload 2.1.0'])
-            metadata.kvp_list.append(['PyOmeroUpload', 'https://github.com/SynthSys/pyOmeroUpload'])
 
         dataset_id, image_id_list = None, None
 
@@ -106,7 +106,7 @@ class DataTransferManager:
 
             dataset_id = str(dataset_obj.getId().getValue())
 
-            self.upload_metadata(dataset_id, data_broker, dir_path, metadata)
+            self.upload_metadata(dataset_id, data_broker, dir_path, metadata, include_provenance_kvps)
 
             data_broker.open_omero_session()
 
@@ -148,7 +148,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
