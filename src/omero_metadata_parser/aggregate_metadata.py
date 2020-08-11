@@ -26,6 +26,8 @@ class MetadataAggregator(MetadataParser):
         if len(input_path) > 0:
             acq_parser = AcqMetadataParser()
             acq_metadata = acq_parser.extract_metadata(input_path[0])
+        else:
+            print("WARNING: No metadata acquisition log file found in {}".format(dir_path))
 
         input_path = glob.glob(os.path.join(dir_path, '*[Ll]og.txt'))
 
@@ -33,6 +35,8 @@ class MetadataAggregator(MetadataParser):
         if len(input_path) > 0:
             log_parser = LogMetadataParser()
             log_metadata = log_parser.extract_metadata(input_path[0])
+        else:
+            print("WARNING: No metadata text log file found in {}".format(dir_path))
 
         if log_metadata is not None and acq_metadata is not None:
             merged_metadata = self.merge_object_properties(log_metadata, acq_metadata)
