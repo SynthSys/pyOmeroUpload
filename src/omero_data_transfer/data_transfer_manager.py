@@ -80,8 +80,10 @@ class DataTransferManager:
     essentially the same thing 
     (https://docs.openmicroscopy.org/omero/5.4.10/users/cli/import.html).
     '''
-    def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False, include_provenance_kvps=True):
-        metadata = self.metadata_parser.extract_metadata(dir_path)
+    def upload_data_dir(self, data_broker, dataset_name, dir_path, hypercube=False, include_provenance_kvps=True,
+                        ignore_metadata=False):
+        if ignore_metadata == False:
+            metadata = self.metadata_parser.extract_metadata(dir_path)
 
         dataset_id, image_id_list = None, None
 
@@ -106,7 +108,9 @@ class DataTransferManager:
 
             dataset_id = str(dataset_obj.getId().getValue())
 
-            self.upload_metadata(dataset_id, data_broker, dir_path, metadata, include_provenance_kvps)
+            print(ignore_metadata)
+            if ignore_metadata == False:
+                self.upload_metadata(dataset_id, data_broker, dir_path, metadata, include_provenance_kvps)
 
             data_broker.open_omero_session()
 

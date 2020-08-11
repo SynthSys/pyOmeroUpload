@@ -68,11 +68,16 @@ parser.add_argument('-v', '--include-provenance-metadata', action='store_true',
                     dest='include_provenance_kvps', required=False, default=True,
                     help="instructs the uploader to automatically include provenenance metadata")
 
+parser.add_argument('-x', '--ignore-metadata', action='store_true',
+                    dest='ignore_metadata', required=False, default=False,
+                    help="instructs the uploader to ignore metadata parsing and only upload images")
+
 args = parser.parse_args()
 data_path = args.data_path
 dataset_name = args.dataset_name
 config_file = args.config_file
-hypercube, custom_metadata_parser, custom_image_processor, include_provenance_kvps = False, False, False, True
+hypercube, custom_metadata_parser, custom_image_processor, include_provenance_kvps, \
+    ignore_metadata = False, False, False, True, False
 module_path = ''
 
 username = args.username
@@ -102,7 +107,7 @@ elif username is not None and server is not None:
         print("Dataset name is empty")
         quit()
 
-    #PASSWORD = getpass.getpass('Password: '.encode('ascii'))
+    # PASSWORD = getpass.getpass('Password: '.encode('ascii'))
     PASSWORD = getpass.getpass('Password: ')
     # PASSWORD = str(PASSWORD.encode('ascii')).encode('ascii')
     # PASSWORD = u''.join(PASSWORD)
@@ -140,6 +145,9 @@ if data_path is not None and dataset_name is not None:
     if args.include_provenance_kvps is not None:
         include_provenance_kvps = args.include_provenance_kvps
 
+    if args.ignore_metadata is not None:
+        ignore_metadata = args.ignore_metadata
+
     parser_class, image_processor_impl = None, None
 
     if args.module_path is not None and args.module_path.strip() is not '':
@@ -169,4 +177,4 @@ if data_path is not None and dataset_name is not None:
     # start upload process
     uploader.launch_upload(dataset_name=dataset_name, data_path=data_path, hypercube=hypercube,
                            parser_class=parser_class, image_processor_impl=image_processor_impl,
-                           include_provenance_kvps=include_provenance_kvps)
+                           include_provenance_kvps=include_provenance_kvps, ignore_metadata=ignore_metadata)
