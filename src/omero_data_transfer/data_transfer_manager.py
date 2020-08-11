@@ -109,7 +109,7 @@ class DataTransferManager:
             dataset_id = str(dataset_obj.getId().getValue())
 
             print(ignore_metadata)
-            if ignore_metadata == False:
+            if ignore_metadata == False and metadata is not None:
                 self.upload_metadata(dataset_id, data_broker, dir_path, metadata, include_provenance_kvps)
 
             data_broker.open_omero_session()

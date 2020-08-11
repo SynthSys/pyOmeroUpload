@@ -17,20 +17,27 @@ class MetadataAggregator(MetadataParser):
 
     def extract_metadata(self, filename):
         dir_path = filename
-        input_path = glob.glob(os.path.join(dir_path,'*[Aa]cq.txt'))
+        input_path = glob.glob(os.path.join(dir_path, '*[Aa]cq.txt'))
+
+        acq_metadata, log_metadata = None, None
 
         # handle acquisition metadata file parsing
         # input_file = open(input_path[0])
-        acq_parser = AcqMetadataParser()
-        acq_metadata = acq_parser.extract_metadata(input_path[0])
+        if len(input_path) > 0:
+            acq_parser = AcqMetadataParser()
+            acq_metadata = acq_parser.extract_metadata(input_path[0])
 
-        input_path = glob.glob(os.path.join(dir_path,'*[Ll]og.txt'))
+        input_path = glob.glob(os.path.join(dir_path, '*[Ll]og.txt'))
 
         # handle acquisition metadata file parsing
-        log_parser = LogMetadataParser()
-        log_metadata = log_parser.extract_metadata(input_path[0])
+        if len(input_path) > 0:
+            log_parser = LogMetadataParser()
+            log_metadata = log_parser.extract_metadata(input_path[0])
 
-        merged_metadata = self.merge_object_properties(log_metadata, acq_metadata)
+        if log_metadata is not None and acq_metadata is not None:
+            merged_metadata = self.merge_object_properties(log_metadata, acq_metadata)
+        else:
+            merged_metadata = None
 
         return merged_metadata
 
