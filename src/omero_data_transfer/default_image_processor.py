@@ -208,7 +208,16 @@ class DefaultImageProcessor(ImageProcessor):
         regex_channel = re.compile(r'.*_\d+_(?P<C>\w+\d*)_\d+\.')
         # regex_zslice = re.compile(r'_Z(?P<Z>\d+)')
         regex_zslice = re.compile(r'.*_\d+_\w+\d*_(?P<Z>\d+)\.')
-        regex_pos = re.compile(r'.*/(?P<pos>pos\d+)/.*')
+
+        path_sep = os.path.sep
+
+        if os.name == 'nt':
+            # need to add an additional backslash to escape the previous backslash otherwise regex parses it as escaping the opening bracket...
+            pos_search_string = path_sep.join([r'.*', r'\(?P<pos>pos\d+)', r'.*'])
+            regex_pos = re.compile(r''.join(pos_search_string))
+        else:
+            pos_search_string = path_sep.join([r'.*', r'(?P<pos>pos\d+)', r'.*'])
+            regex_pos = re.compile(r''.join(pos_search_string))
 
         tSearch = regex_time.search(file)
         cSearch = regex_channel.search(file)
