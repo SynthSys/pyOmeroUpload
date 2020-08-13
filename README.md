@@ -64,5 +64,7 @@ The options are described in the table below.
 | -\-module-path | -m | The absolute path to the directory containing any custom classes required for metadata parsing or image processing | N |  |  
 | -\-custom-metadata-parser | -p | If present, and if module-path is specified, use the class CustomMetadataParser provided in the module file custom_metadata_parser.py | N | omero_metadata_parser/aggregate_metadata.MetadataAggregator |  
 | -\-custom-image-processor | -i | If present, and if module-path is specified, use the class CustomImageProcessor provided in the module file custom_image_processor.py | N | omero_data_transfer/default_image_processor.DefaultImageProcessor |  
+| -\-include-provenance-metadata | -v | If present, instructs the uploader to automatically include provenenance metadata. | N | True  |  
+| -\-ignore-metadata | -x | If present, instructs the uploader to ignore metadata parsing and only upload images. | N | False  |  
 
 The user specifies the target directory and, if desired, a custom module path containing an alternative metadata parser, and custom data transformation function with which to process collections of single images into _n_-dimensional images.
