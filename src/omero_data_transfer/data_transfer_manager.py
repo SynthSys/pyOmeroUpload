@@ -64,7 +64,7 @@ class DataTransferManager:
         kvp_list = metadata.kvp_list
 
         if include_provenance_kvps == True:
-            kvp_list.append(['Uploaded With', 'pyOmeroUpload 2.1.0'])
+            kvp_list.append(['Uploaded With', 'pyOmeroUpload 2.2.0'])
             kvp_list.append(['PyOmeroUpload', 'https://github.com/SynthSys/pyOmeroUpload'])
 
         data_broker.add_kvps(kvp_list, 'Dataset', dataset_id)
