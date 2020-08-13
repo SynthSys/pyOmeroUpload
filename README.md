@@ -60,7 +60,7 @@ The options are described in the table below.
 | -\-port | -o | The port of the target OMERO server instance | N | 4064 |  
 | -\-data-path | -d | The absolute path to the data directory containing data and metadata to be uploaded | Y |  |  
 | -\-dataset-name | -n | The name of the dataset to be uploaded to the OMERO server | Y |  |  
-| -\-hypercube | -u | If present, performs conversion of the data in the data directory into multi-dimensional images for upload to OMERO as hypercubes. | N | False  |  
+| -\-hypercube | -y | If present, performs conversion of the data in the data directory into multi-dimensional images for upload to OMERO as hypercubes. | N | False  |  
 | -\-module-path | -m | The absolute path to the directory containing any custom classes required for metadata parsing or image processing | N |  |  
 | -\-custom-metadata-parser | -p | If present, and if module-path is specified, use the class CustomMetadataParser provided in the module file custom_metadata_parser.py | N | omero_metadata_parser/aggregate_metadata.MetadataAggregator |  
 | -\-custom-image-processor | -i | If present, and if module-path is specified, use the class CustomImageProcessor provided in the module file custom_image_processor.py | N | omero_data_transfer/default_image_processor.DefaultImageProcessor |  
