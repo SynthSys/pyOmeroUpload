@@ -155,7 +155,7 @@ setup(
         'pytest-cov>=2.8.1',
         'pillow>=7.1.0',
         'enum34==1.1.10',
-        'pyyaml==5.3.1',
+        'pyyaml==5.4',
         'pandas>=1.0.3',
         'scipy>=1.4.1',
         'requests>=2.23.0',
